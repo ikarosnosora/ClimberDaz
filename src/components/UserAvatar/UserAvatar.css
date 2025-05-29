@@ -1,0 +1,31 @@
+.user-avatar-container {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.user-avatar-container .adm-avatar {
+  background-color: #f0f0f0;
+  color: #666;
+  font-weight: 600;
+}
+
+.level-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  transform: scale(0.8);
+  font-size: 10px;
+  min-width: 20px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 8px;
+  padding: 0 4px;
+  font-weight: 600;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-avatar-container:active {
+  opacity: 0.8;
+} 

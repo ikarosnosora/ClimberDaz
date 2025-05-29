@@ -1,0 +1,178 @@
+/* 
+  ActivityList.css
+  Most styles have been migrated to Tailwind CSS utility classes directly in the ActivityList.tsx component.
+  This file is kept minimal. Add specific styles here only if they cannot be easily achieved with Tailwind,
+  for example, complex animations, or highly specific child component overrides not manageable via props.
+*/
+
+/* Example of a style that might be kept if necessary:
+.some-very-specific-child-selector {
+  property: value !important; 
+}
+*/
+
+.activity-list-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.page-header {
+  background-color: #fff;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 99;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.search-bar {
+  --background: #f5f5f5;
+  --border-radius: 20px;
+  --height: 36px;
+  flex-grow: 1;
+}
+
+/* New class for the resized search bar if needed, or adjust .search-bar directly */
+.search-bar-resized {
+  flex-grow: 1;
+  --background: var(--adm-fill-content); /* Use theme variable */
+  --border-radius: 20px;
+  --height: 36px;
+}
+
+.search-filter-bar {
+  display: flex; /* Ensure flex behavior */
+  align-items: center; /* Vertically align items */
+  width: 100%;
+  margin-bottom: 12px; /* Increased margin for separation from content below */
+  gap: 8px; /* Add gap between search bar and filter button */
+}
+
+.filter-button {
+  padding: 0 4px; /* Reduced horizontal padding */
+  min-width: auto;
+  /* color: #007aff; */ /* Inherit or use theme variable */
+  color: var(--adm-color-primary);
+  font-size: 20px; /* Slightly reduced icon size for filter button */
+  display: flex; /* For centering icon if needed */
+  align-items: center;
+  justify-content: center;
+  height: 36px; /* Match search bar height */
+  border: none; /* Remove border if fill="none" doesn't do it cleanly */
+}
+
+.filter-button .adm-button-content {
+  line-height: 1;
+}
+
+.page-content {
+  padding: 12px 16px;
+  min-height: calc(100vh - 120px);
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* Pull to refresh customization */
+.activity-list-page .adm-pull-to-refresh {
+  min-height: calc(100vh - 120px);
+}
+
+/* Infinite scroll customization */
+.activity-list-page .adm-infinite-scroll-content {
+  text-align: center;
+  padding: 20px 0;
+  color: #999;
+  font-size: 14px;
+}
+
+/* Empty state */
+.activity-list-page .adm-empty {
+  padding: 60px 0;
+}
+
+/* Styles for enhanced empty state */
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0; /* Adjust padding as needed */
+}
+
+.empty-state-create-button {
+  margin-top: 20px;
+}
+
+/* Skeleton Styles for Activity List */
+.activity-list-skeletons .activity-card-skeleton {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background-color: #fff; /* Ensure card background for skeleton */
+  padding: 16px; /* Match typical card padding */
+}
+
+.activity-list-skeletons .skeleton-tags {
+  margin-top: 12px;
+}
+
+.activity-list-skeletons .skeleton-tag-item {
+  /* stylelint-disable-next-line declaration-no-important */
+  width: 70px !important; /* Override default Skeleton.Title width */
+  /* stylelint-disable-next-line declaration-no-important */
+  height: 28px !important; /* Override default Skeleton.Title height */
+  /* stylelint-disable-next-line declaration-no-important */
+  border-radius: 6px !important; /* Match tag border-radius */
+  margin-bottom: 0 !important; /* Reset margin if Skeleton.Title adds some */
+}
+
+/* Make skeleton tag items vary in width for a more realistic look */
+.activity-list-skeletons .skeleton-tag-item:nth-child(1) {
+  /* stylelint-disable-next-line declaration-no-important */
+  width: 80px !important;
+}
+.activity-list-skeletons .skeleton-tag-item:nth-child(2) {
+  /* stylelint-disable-next-line declaration-no-important */
+  width: 60px !important;
+}
+
+/* Filter Popup Styles */
+.filter-popup-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-popup-title {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.filter-section {
+  margin-bottom: 16px;
+}
+
+.filter-section h4 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+/* Adjust selector padding/margin if needed */
+.filter-section .adm-selector {
+  /* Example: --padding-left: 0; */
+} 

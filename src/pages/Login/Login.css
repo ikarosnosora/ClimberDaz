@@ -1,0 +1,92 @@
+.login-page {
+  min-height: 100vh;
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border-radius: 20px;
+  padding: 40px 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.app-logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo-icon {
+  font-size: 60px;
+  margin-bottom: 16px;
+  display: inline-block;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.app-name {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.app-tagline {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
+}
+
+.login-form {
+  margin-bottom: 24px;
+}
+
+.login-form .adm-form-item-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.login-button {
+  margin-top: 20px;
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 24px;
+  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+  background: var(--primary);
+}
+
+.login-tips {
+  text-align: center;
+  font-size: 14px;
+  color: #999;
+}
+
+.login-tips p {
+  margin: 4px 0;
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 32px 20px;
+  }
+  
+  .app-name {
+    font-size: 28px;
+  }
+} 

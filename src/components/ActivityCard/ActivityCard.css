@@ -1,0 +1,96 @@
+.activity-card {
+  margin-bottom: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.activity-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.activity-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.activity-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-info {
+  width: 100%;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.info-icon {
+  font-size: 16px;
+  margin-right: 8px;
+  color: #999;
+}
+
+.distance {
+  margin-left: 8px;
+  color: #1677ff;
+  font-weight: 500;
+}
+
+.activity-tags {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.activity-status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.activity-status.full {
+  background-color: #fff2e8;
+  color: #fa8c16;
+}
+
+.activity-status.started {
+  background-color: #f0f0f0;
+  color: #8c8c8c;
+}
+
+/* Tag customization */
+.activity-card .adm-tag, .activity-tag-item {
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag-icon {
+  margin-right: 5px;
+  font-size: 15px;
+} 
