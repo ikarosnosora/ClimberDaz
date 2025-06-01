@@ -1,0 +1,201 @@
+/* NotificationBell - Integrated header notification styles */
+.notification-bell {
+  /* Size & Shape */
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  
+  /* Modern Design */
+  background: rgba(249, 250, 251, 0.8);
+  border: 1px solid rgba(229, 231, 235, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  
+  /* Shadow */
+  box-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  
+  /* Icon Container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+  
+  /* Interactions */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  
+  /* Remove default button styles */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* When used as relative positioning */
+.notification-bell.relative {
+  position: relative;
+}
+
+/* Bell Icon */
+.notification-bell-icon {
+  font-size: 18px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover State */
+.notification-bell:hover {
+  background: rgba(249, 250, 251, 0.95);
+  border-color: rgba(229, 231, 235, 0.8);
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.07),
+    0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.notification-bell:hover .notification-bell-icon {
+  color: #F97316; /* Orange-500 */
+  transform: scale(1.05);
+}
+
+/* Pressed State */
+.notification-bell.pressed {
+  transform: scale(0.95);
+  transition-duration: 0.1s;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  
+  min-width: 20px;
+  height: 20px;
+  
+  /* Gradient Background - Updated to match app theme */
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  border-radius: 10px;
+  
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Border */
+  border: 2px solid white;
+  
+  /* Shadow */
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+}
+
+/* Badge Text */
+.notification-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+/* Pulse Animation for New Notifications */
+@keyframes notification-pulse {
+  0% { 
+    transform: scale(1); 
+    opacity: 1; 
+  }
+  50% { 
+    transform: scale(1.05); 
+    opacity: 0.9; 
+  }
+  100% { 
+    transform: scale(1); 
+    opacity: 1; 
+  }
+}
+
+.notification-bell.has-new-notifications {
+  animation: notification-pulse 2s infinite ease-in-out;
+}
+
+.notification-bell.has-new-notifications .notification-badge {
+  animation: notification-pulse 2s infinite ease-in-out;
+}
+
+/* Focus state for accessibility */
+.notification-bell:focus {
+  outline: 2px solid rgba(249, 115, 22, 0.3);
+  outline-offset: 2px;
+  border-color: rgba(249, 115, 22, 0.5);
+}
+
+/* Badge scale animation on new notification */
+@keyframes badge-bounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.notification-badge.new-notification {
+  animation: badge-bounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Active state when notifications page is open */
+.notification-bell.active {
+  background: rgba(249, 115, 22, 0.1);
+  border-color: rgba(249, 115, 22, 0.3);
+  color: #F97316;
+}
+
+.notification-bell.active .notification-bell-icon {
+  color: #F97316;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .notification-bell {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .notification-bell-icon {
+    font-size: 16px;
+  }
+  
+  .notification-badge {
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+  }
+  
+  .notification-count {
+    font-size: 10px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .notification-bell {
+    background: rgba(17, 24, 39, 0.8);
+    border-color: rgba(75, 85, 99, 0.6);
+    color: #D1D5DB;
+  }
+  
+  .notification-bell:hover {
+    background: rgba(17, 24, 39, 0.95);
+    border-color: rgba(75, 85, 99, 0.8);
+  }
+  
+  .notification-bell:hover .notification-bell-icon {
+    color: #FB923C;
+  }
+  
+  .notification-bell.active {
+    background: rgba(249, 115, 22, 0.2);
+    border-color: rgba(249, 115, 22, 0.4);
+  }
+} 

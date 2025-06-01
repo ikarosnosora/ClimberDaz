@@ -246,7 +246,7 @@ const Layout: React.FC = () => {
           >
             <div className="h-full overflow-y-auto">
               <Suspense fallback={<ModalLoading />}>
-                <CreateActivity onClose={() => setCreateModalVisible(false)} />
+                <CreateActivity />
               </Suspense>
             </div>
           </div>

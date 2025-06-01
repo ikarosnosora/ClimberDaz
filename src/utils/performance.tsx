@@ -173,34 +173,59 @@ export const withPerformanceMonitoring = <P extends object>(
 };
 
 /**
- * Debounce function for performance optimization
+ * Enhanced debounce function with immediate option
  */
 export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
-  wait: number
+  wait: number,
+  immediate = false
 ): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout;
+  let timeout: NodeJS.Timeout | null = null;
   
   return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
+    const callNow = immediate && !timeout;
+    
+    if (timeout) clearTimeout(timeout);
+    
+    timeout = setTimeout(() => {
+      timeout = null;
+      if (!immediate) func(...args);
+    }, wait);
+    
+    if (callNow) func(...args);
   };
 };
 
 /**
- * Throttle function for performance optimization
+ * Enhanced throttle function with leading and trailing options
  */
 export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
-  limit: number
+  limit: number,
+  options: { leading?: boolean; trailing?: boolean } = { leading: true, trailing: true }
 ): ((...args: Parameters<T>) => void) => {
   let inThrottle: boolean;
+  let lastFunc: NodeJS.Timeout;
+  let lastRan: number;
   
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
-      func(...args);
+      if (options.leading !== false) {
+        func(...args);
+      }
       inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
+      lastRan = Date.now();
+    } else {
+      if (options.trailing !== false) {
+        clearTimeout(lastFunc);
+        lastFunc = setTimeout(() => {
+          if (Date.now() - lastRan >= limit) {
+            func(...args);
+            lastRan = Date.now();
+            inThrottle = false;
+          }
+        }, limit - (Date.now() - lastRan));
+      }
     }
   };
 };
@@ -244,4 +269,112 @@ export const logMemoryUsage = (label?: string) => {
       });
     }
   }
+};
+
+/**
+ * Virtual scrolling utility for large lists
+ */
+export const useVirtualScrolling = (
+  itemCount: number,
+  itemHeight: number,
+  containerHeight: number,
+  overscan = 5
+) => {
+  const [scrollTop, setScrollTop] = React.useState(0);
+
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+  const endIndex = Math.min(
+    itemCount - 1,
+    Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
+  );
+
+  const visibleItems = React.useMemo(() => {
+    const items = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      items.push({
+        index: i,
+        style: {
+          position: 'absolute' as const,
+          top: i * itemHeight,
+          height: itemHeight,
+          width: '100%',
+        },
+      });
+    }
+    return items;
+  }, [startIndex, endIndex, itemHeight]);
+
+  const totalHeight = itemCount * itemHeight;
+
+  return {
+    scrollTop,
+    setScrollTop,
+    visibleItems,
+    totalHeight,
+    startIndex,
+    endIndex,
+  };
+};
+
+/**
+ * Intersection Observer hook for lazy loading
+ */
+export const useIntersectionObserver = (
+  options: IntersectionObserverInit = {}
+): [React.RefCallback<Element>, IntersectionObserverEntry | undefined] => {
+  const [entry, setEntry] = React.useState<IntersectionObserverEntry>();
+  const [element, setElement] = React.useState<Element | null>(null);
+
+  const callbackRef = React.useCallback((node: Element | null) => {
+    setElement(node);
+  }, []);
+
+  React.useEffect(() => {
+    if (!element) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setEntry(entry);
+    }, options);
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [element, options]);
+
+  return [callbackRef, entry];
+};
+
+/**
+ * Image lazy loading hook
+ */
+export const useLazyImage = (src: string, placeholder?: string) => {
+  const [imageSrc, setImageSrc] = React.useState(placeholder || '');
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isError, setIsError] = React.useState(false);
+  const [ref, entry] = useIntersectionObserver({
+    threshold: 0.1,
+    rootMargin: '50px',
+  });
+
+  React.useEffect(() => {
+    if (entry?.isIntersecting && src) {
+      setIsLoading(true);
+      setIsError(false);
+      
+      const img = new Image();
+      img.onload = () => {
+        setImageSrc(src);
+        setIsLoading(false);
+      };
+      img.onerror = () => {
+        setIsError(true);
+        setIsLoading(false);
+      };
+      img.src = src;
+    }
+  }, [entry?.isIntersecting, src]);
+
+  return { ref, imageSrc, isLoading, isError };
 }; 

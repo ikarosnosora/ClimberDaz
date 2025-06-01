@@ -13,7 +13,10 @@ const NotificationContainer: React.FC = () => {
   if (!notifications.length) return null;
 
   return (
-    <div className="notification-container fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+    <div 
+      className="notification-container fixed top-4 right-4 space-y-2 max-w-sm"
+      style={{ zIndex: 1070 }} // Toast层级 - 永远在最上层 (高于所有其他组件)
+    >
       {notifications.map((notification, index) => (
         <div
           key={index}

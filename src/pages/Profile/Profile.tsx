@@ -1,32 +1,26 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUserSelector, useUserActions } from '../../store/useOptimizedStore';
+import { useUserSelector, useUserActions, useActivitySelector } from '../../store/useOptimizedStore';
 import { showSuccess, showError } from '../../utils/notifications';
 import { SUCCESS_MESSAGES } from '../../utils/constants';
+import { colors, shadows } from '../../utils/designSystem';
 import { UserAvatar } from '../../components';
-import './Profile.css'; 
 import NotificationPreferences from '../../components/Profile/NotificationPreferences';
 import EditProfileModal from '../../components/Profile/EditProfileModal';
-import type { IconProps } from '../../types';
-
-// Icon Placeholders with proper typing
-const IconPlaceholder = ({ name, className = "w-5 h-5" }: { name: string, className?: string }) => <span className={`inline-block text-gray-500 ${className}`}>[{name}]</span>;
-const SetOutline = (props: IconProps) => <IconPlaceholder {...props} name="Set" />;
-const TeamOutline = (props: IconProps) => <IconPlaceholder {...props} name="Team" />;
-const StarOutline = (props: IconProps) => <IconPlaceholder {...props} name="Star" />;
-const FlagOutline = (props: IconProps) => <IconPlaceholder {...props} name="Flag" />;
-const MailOutline = (props: IconProps) => <IconPlaceholder {...props} name="Mail" />;
-const ChevronRightIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-400">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-  </svg>
-);
+import './Profile.css';
 
 const Profile: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useUserSelector();
   const { logout } = useUserActions();
+  const { activities } = useActivitySelector();
   const [editModalVisible, setEditModalVisible] = useState(false);
+
+  // User activities statistics
+  const userActivities = activities.filter(activity => activity.hostId === user?.openid);
+  const participatedActivities = activities.filter(activity => 
+    activity.participantIds?.includes(user?.openid || '')
+  );
 
   const handleLogout = async () => {
     if (window.confirm('确定要退出登录吗？')) {
@@ -34,141 +28,268 @@ const Profile: React.FC = () => {
         await logout();
         navigate('/login');
         showSuccess(SUCCESS_MESSAGES.LOGOUT_SUCCESS);
-      } catch (_error) {
+      } catch (error) {
         showError('退出登录失败，请重试');
       }
     }
   };
 
-  const handleEditProfile = () => {
-    setEditModalVisible(true);
-  };
-
-  const handleViewActivities = (type: 'hosted' | 'joined') => {
-    navigate(`/my-activities?type=${type}`);
-  };
-
-  const handleViewReviews = () => {
-    navigate('/my-reviews');
-  };
-
-  const handleSendFeedback = () => {
-    window.location.href = "mailto:feedback@climberdaz.example.com?subject=ClimberDaz App Feedback";
-    showSuccess('打开邮件客户端以发送反馈...');
-  };
-
   if (!user) {
-    return <div className="p-4 text-center">请先登录</div>; 
+    return (
+      <div 
+        className="flex items-center justify-center h-screen"
+        style={{
+          background: `linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%)`,
+        }}
+      >
+        <div className="text-center">
+          <div className="text-6xl mb-4">👤</div>
+          <p className="text-neutral-500">加载用户信息中...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="profile-page bg-gray-100 min-h-screen pb-16">
-      {/* Custom NavBar */}
-      <div className="bg-white shadow-sm sticky top-0 z-20">
-        <div className="max-w-md mx-auto px-4">
-          <div className="relative flex items-center justify-center h-12">
-            {/* No back arrow as per original NavBar backArrow={false} */}
-            <h1 className="text-lg font-semibold text-gray-800">个人中心</h1>
-            <button onClick={handleEditProfile} className="absolute right-0 p-2 text-blue-500 hover:text-blue-700" aria-label="Edit profile">
-              <SetOutline className="w-6 h-6" />
+    <div 
+      className="min-h-screen pb-20"
+      style={{
+        background: `linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%)`,
+      }}
+    >
+      <div className="p-6 space-y-6">
+        {/* Enhanced Profile Header */}
+        <div 
+          className="rounded-2xl p-8 backdrop-blur-sm border border-white/50"
+          style={{
+            background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
+            boxShadow: shadows.large,
+          }}
+        >
+          <div className="text-center">
+            <div className="flex items-center space-x-4 mt-2">
+              <UserAvatar
+                avatar={user.avatar}
+                nickname={user.nickname}
+                level={user.level}
+                size={88}
+              />
+            </div>
+            
+            <div className="text-center mt-4">
+              <h1 
+                className="text-2xl font-bold tracking-tight"
+                style={{
+                  background: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[600]} 100%)`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                🏔️ {user.nickname}
+              </h1>
+              {user.level && (
+                <div className="flex items-center mt-2">
+                  <span 
+                    className="px-4 py-2 rounded-xl text-sm font-semibold backdrop-blur-sm"
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.warning.primary}20 0%, ${colors.warning.secondary}20 100%)`,
+                      color: colors.warning.primary,
+                      border: `1px solid ${colors.warning.primary}30`,
+                    }}
+                  >
+                    ⭐ Lv.{user.level} 攀岩达人
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center space-x-4 mt-3 text-sm font-medium" style={{ color: colors.neutral[600] }}>
+                {user.city && (
+                  <span className="flex items-center gap-1">
+                    <span>📍</span>{user.city}
+                  </span>
+                )}
+                {user.climbingAge !== undefined && (
+                  <span className="flex items-center gap-1">
+                    <span>🕒</span>{user.climbingAge}年岩龄
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {user.introduction && (
+            <div 
+              className="mt-4 pt-4 rounded-xl p-4"
+              style={{
+                background: `rgba(255, 255, 255, 0.4)`,
+                border: `1px solid rgba(255, 255, 255, 0.6)`,
+              }}
+            >
+              <p className="text-sm font-medium leading-relaxed" style={{ color: colors.neutral[700] }}>
+                💭 {user.introduction}
+              </p>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={() => setEditModalVisible(true)}
+              className="flex-1 py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105"
+              style={{
+                background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
+                color: 'white',
+                boxShadow: shadows.medium,
+              }}
+            >
+              ✏️ 编辑资料
+            </button>
+            
+            <button
+              onClick={handleLogout}
+              className="py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-300 hover:scale-105"
+              style={{
+                background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
+                color: colors.error.primary,
+                border: `1px solid ${colors.error.primary}30`,
+                boxShadow: shadows.soft,
+              }}
+            >
+              🚪 退出登录
             </button>
           </div>
         </div>
-      </div>
 
-      <div className="profile-content p-4 space-y-4">
-        {/* User Info Card */}
-        <div className="user-info-card bg-white shadow-lg rounded-lg p-4">
-          <div className="flex items-center space-x-4">
-            <UserAvatar
-              avatar={user.avatar}
-              nickname={user.nickname}
-              level={user.level}
-              size={80}
-            />
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-800">{user.nickname}</h2>
-              {user.level && <div className="text-sm text-yellow-500">Lv.{user.level} 攀岩达人</div>}
-              <div className="text-xs text-gray-500 mt-0.5">ID: {user.openid.slice(-8)}</div>
-              {user.city && <div className="text-xs text-gray-500 mt-0.5">城市: {user.city}</div>}
-              {user.climbingAge !== undefined && <div className="text-xs text-gray-500 mt-0.5">岩龄: {user.climbingAge}年</div>}
+        {/* Enhanced Climbing Info Card */}
+        {(user.climbingPreferences && user.climbingPreferences.length > 0) || 
+         (user.frequentlyVisitedGyms && user.frequentlyVisitedGyms.length > 0) || 
+         (user.gearTags && user.gearTags.length > 0) ? (
+          <div 
+            className="rounded-2xl backdrop-blur-sm overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
+              boxShadow: shadows.large,
+              border: `1px solid rgba(255, 255, 255, 0.5)`,
+            }}
+          >
+            <div className="p-6 border-b" style={{ borderColor: `rgba(255, 255, 255, 0.5)` }}>
+              <h3 className="text-lg font-bold" style={{ color: colors.neutral[800] }}>
+                🧗‍♀️ 攀岩信息
+              </h3>
             </div>
-          </div>
-          {user.introduction && <p className="text-sm text-gray-600 mt-3 pt-3 border-t border-gray-200">简介: {user.introduction}</p>}
-        </div>
-
-        {/* Menu List */}
-        <div className="menu-card bg-white shadow-lg rounded-lg overflow-hidden">
-          {/* Simulating List with divs */}
-          <div onClick={() => handleViewActivities('hosted')} className="flex items-center p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50">
-            <FlagOutline className="mr-3 text-blue-500" />
-            <span className="flex-1 text-gray-700">我发起的活动</span>
-            <ChevronRightIcon />
-          </div>
-          <div onClick={() => handleViewActivities('joined')} className="flex items-center p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50">
-            <TeamOutline className="mr-3 text-green-500" />
-            <span className="flex-1 text-gray-700">我参与的活动</span>
-            <ChevronRightIcon />
-          </div>
-          <div onClick={handleViewReviews} className="flex items-center p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50">
-            <StarOutline className="mr-3 text-yellow-500" />
-            <span className="flex-1 text-gray-700">我的评价</span>
-            <ChevronRightIcon />
-          </div>
-          <div onClick={handleSendFeedback} className="flex items-center p-4 cursor-pointer hover:bg-gray-50">
-            <MailOutline className="mr-3 text-purple-500" />
-            <span className="flex-1 text-gray-700">发送反馈</span>
-            <ChevronRightIcon />
-          </div>
-        </div>
-
-        {/* Notification Settings Card - title was part of antd Card, now a separate header */}
-        <div className="notification-settings-card bg-white shadow-lg rounded-lg">
-          <h3 className="text-md font-semibold text-gray-700 p-4 border-b border-gray-200">通知设置</h3>
-          <div className="p-4">
-            <NotificationPreferences />
-          </div>
-        </div>
-
-        {/* Climbing Info Card */}
-        {(user.climbingPreferences && user.climbingPreferences.length > 0) || (user.frequentlyVisitedGyms && user.frequentlyVisitedGyms.length > 0) || (user.gearTags && user.gearTags.length > 0) ? (
-          <div className="climbing-info-card bg-white shadow-lg rounded-lg">
-            <h3 className="text-md font-semibold text-gray-700 p-4 border-b border-gray-200">攀爬信息</h3>
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y" style={{ borderColor: `rgba(255, 255, 255, 0.5)` }}>
               {user.climbingPreferences && user.climbingPreferences.length > 0 && (
-                 <div className="p-4 flex">
-                   <span className="w-24 text-sm text-gray-500 font-medium">偏好类型</span>
-                   <span className="text-sm text-gray-700">{user.climbingPreferences.join(', ')}</span>
-                 </div>
+                <div className="p-6 flex gap-4">
+                  <span className="w-20 text-sm font-bold" style={{ color: colors.neutral[600] }}>
+                    偏好类型
+                  </span>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap gap-2">
+                      {user.climbingPreferences.map((pref: string, index: number) => (
+                        <span 
+                          key={index} 
+                          className="px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm"
+                          style={{
+                            background: `linear-gradient(135deg, ${colors.secondary[500]}20 0%, ${colors.secondary[600]}20 100%)`,
+                            color: colors.secondary[600],
+                            border: `1px solid ${colors.secondary[500]}30`,
+                          }}
+                        >
+                          {pref}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               )}
               {user.frequentlyVisitedGyms && user.frequentlyVisitedGyms.length > 0 && (
-                <div className="p-4 flex">
-                  <span className="w-24 text-sm text-gray-500 font-medium">常去岩馆</span>
-                  <span className="text-sm text-gray-700">{user.frequentlyVisitedGyms.join(', ')}</span>
+                <div className="p-6 flex gap-4">
+                  <span className="w-20 text-sm font-bold" style={{ color: colors.neutral[600] }}>
+                    常去岩馆
+                  </span>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap gap-2">
+                      {user.frequentlyVisitedGyms.map((gym: string, index: number) => (
+                        <span 
+                          key={index} 
+                          className="px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm"
+                          style={{
+                            background: `linear-gradient(135deg, ${colors.primary[500]}20 0%, ${colors.primary[600]}20 100%)`,
+                            color: colors.primary[600],
+                            border: `1px solid ${colors.primary[500]}30`,
+                          }}
+                        >
+                          🏢 {gym}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
               {user.gearTags && user.gearTags.length > 0 && (
-                <div className="p-4 flex">
-                  <span className="w-24 text-sm text-gray-500 font-medium">我的装备</span>
-                  <span className="text-sm text-gray-700">{user.gearTags.join(', ')}</span>
+                <div className="p-6 flex gap-4">
+                  <span className="w-20 text-sm font-bold" style={{ color: colors.neutral[600] }}>
+                    装备标签
+                  </span>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap gap-2">
+                      {user.gearTags.map((gear: string, index: number) => (
+                        <span 
+                          key={index} 
+                          className="px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-sm"
+                          style={{
+                            background: `linear-gradient(135deg, ${colors.warning.primary}20 0%, ${colors.warning.secondary}20 100%)`,
+                            color: colors.warning.primary,
+                            border: `1px solid ${colors.warning.primary}30`,
+                          }}
+                        >
+                          🎯 {gear}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         ) : null}
 
-        {/* Action Section */}
-        <div className="action-section mt-6 mb-2">
-          <button
-            className="w-full py-3 px-4 rounded-lg font-semibold bg-red-500 hover:bg-red-600 text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-150 ease-in-out"
-            onClick={handleLogout}
-          >
-            退出登录
-          </button>
+        {/* Activity Statistics */}
+        <div 
+          className="rounded-2xl p-6 backdrop-blur-sm"
+          style={{
+            background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
+            boxShadow: shadows.large,
+            border: `1px solid rgba(255, 255, 255, 0.5)`,
+          }}
+        >
+          <h3 className="text-lg font-bold mb-4" style={{ color: colors.neutral[800] }}>
+            📊 活动统计
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold" style={{ color: colors.primary[600] }}>
+                {userActivities.length}
+              </div>
+              <div className="text-sm" style={{ color: colors.neutral[600] }}>
+                发起的活动
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold" style={{ color: colors.secondary[600] }}>
+                {participatedActivities.length}
+              </div>
+              <div className="text-sm" style={{ color: colors.neutral[600] }}>
+                参与的活动
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Notification Preferences */}
+        <NotificationPreferences />
       </div>
 
-      {/* EditProfileModal remains, assuming it handles its own visibility and antd-mobile parts if any */}
+      {/* EditProfileModal */}
       {user && (
         <EditProfileModal 
           visible={editModalVisible} 

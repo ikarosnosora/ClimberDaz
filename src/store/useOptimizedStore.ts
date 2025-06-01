@@ -1,6 +1,7 @@
-import { create } from 'zustand';
+import { createWithEqualityFn } from 'zustand/traditional';
 import { devtools, persist, subscribeWithSelector } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { shallow } from 'zustand/shallow';
 import type { 
   User, 
   Activity, 
@@ -11,6 +12,7 @@ import type {
 } from '../types';
 import { defaultNotificationPreferences } from '../types';
 import { STORAGE_KEYS } from '../utils/constants';
+import { mockActivities, mockAnnouncements } from '../data/mockData';
 
 /**
  * Optimized Store Architecture
@@ -68,6 +70,10 @@ interface ActivityActions {
   addActivity: (activity: Activity) => void;
   updateActivity: (id: string, updates: Partial<Activity>) => void;
   removeActivity: (id: string) => void;
+  
+  // Activity Participation
+  joinActivity: (activityId: string, userId: string) => Promise<void>;
+  leaveActivity: (activityId: string, userId: string) => Promise<void>;
   
   // Filter Management
   setSearchText: (text: string) => void;
@@ -136,12 +142,12 @@ const mockAdminUsers: User[] = [
   },
 ];
 
-// Store Implementation
-export const useOptimizedStore = create<OptimizedStore>()(
+// Store Implementation with proper migration
+export const useOptimizedStore = createWithEqualityFn<OptimizedStore>()(
   devtools(
     persist(
       subscribeWithSelector(
-        immer((set) => ({
+        immer((set, _get) => ({
           // Initial State
           // User State
           user: null,
@@ -149,17 +155,17 @@ export const useOptimizedStore = create<OptimizedStore>()(
           isAuthenticated: false,
           isLoading: false,
           
-          // Activity State
-          activities: [],
+          // Activity State - Initialize with mock activities
+          activities: mockActivities,
           currentActivity: null,
-          totalActivities: 0,
+          totalActivities: mockActivities.length,
           isLoadingActivities: false,
           searchText: '',
           selectedTypes: [],
           selectedGrades: [],
           
-          // App State
-          announcements: [],
+          // App State - Initialize with mock announcements
+          announcements: mockAnnouncements,
           isLoadingAnnouncements: false,
           error: null,
           theme: 'light',
@@ -178,9 +184,14 @@ export const useOptimizedStore = create<OptimizedStore>()(
             set((state) => {
               state.user = null;
               state.isAuthenticated = false;
+              // Reset activities and current state on logout
               state.activities = [];
               state.currentActivity = null;
               state.totalActivities = 0;
+              // Clear search filters
+              state.searchText = '';
+              state.selectedTypes = [];
+              state.selectedGrades = [];
             }),
 
           setAllUsers: (users) =>
@@ -195,30 +206,32 @@ export const useOptimizedStore = create<OptimizedStore>()(
             set((state) => {
               const userIndex = state.allUsers.findIndex(u => u.openid === userId);
               if (userIndex !== -1) {
-                Object.assign(state.allUsers[userIndex], updates, { updatedAt: new Date() });
+                Object.assign(state.allUsers[userIndex], updates);
               }
               
+              // Update current user if it matches
               if (state.user?.openid === userId) {
-                Object.assign(state.user, updates, { updatedAt: new Date() });
-              }
-            }),
-
-          updateUserNotificationPreferences: (preferences: Partial<UserNotificationPreferences>) =>
-            set((state) => {
-              if (state.user && state.user.notificationPreferences) {
-                Object.assign(state.user.notificationPreferences, preferences);
+                Object.assign(state.user, updates);
               }
             }),
 
           updateUserProfile: (profileData) =>
             set((state) => {
               if (state.user) {
-                Object.assign(state.user, profileData, { updatedAt: new Date() });
+                Object.assign(state.user, profileData);
                 
+                // Update in allUsers array if present
                 const userIndex = state.allUsers.findIndex(u => u.openid === state.user!.openid);
                 if (userIndex !== -1) {
-                  Object.assign(state.allUsers[userIndex], profileData, { updatedAt: new Date() });
+                  Object.assign(state.allUsers[userIndex], profileData);
                 }
+              }
+            }),
+
+          updateUserNotificationPreferences: (preferences) =>
+            set((state) => {
+              if (state.user && state.user.notificationPreferences) {
+                Object.assign(state.user.notificationPreferences, preferences);
               }
             }),
 
@@ -227,7 +240,7 @@ export const useOptimizedStore = create<OptimizedStore>()(
               state.isLoading = loading;
             }),
 
-          // Activity Actions
+          // Activity Actions - Optimized with batch updates
           setActivities: (activities) =>
             set((state) => {
               state.activities = activities;
@@ -241,8 +254,12 @@ export const useOptimizedStore = create<OptimizedStore>()(
 
           addActivity: (activity) =>
             set((state) => {
-              state.activities.unshift(activity);
-              state.totalActivities += 1;
+              // Check for duplicates before adding
+              const exists = state.activities.some(a => a.id === activity.id);
+              if (!exists) {
+                state.activities.unshift(activity); // Add to beginning for latest first
+                state.totalActivities += 1;
+              }
             }),
 
           updateActivity: (id, updates) =>
@@ -259,14 +276,106 @@ export const useOptimizedStore = create<OptimizedStore>()(
 
           removeActivity: (id) =>
             set((state) => {
+              const initialLength = state.activities.length;
               state.activities = state.activities.filter(act => act.id !== id);
-              state.totalActivities = Math.max(0, state.totalActivities - 1);
+              
+              // Only update totalActivities if an item was actually removed
+              if (state.activities.length < initialLength) {
+                state.totalActivities = Math.max(0, state.totalActivities - 1);
+              }
               
               if (state.currentActivity?.id === id) {
                 state.currentActivity = null;
               }
             }),
 
+          // Optimized participation actions with error handling
+          joinActivity: async (activityId, userId) => {
+            try {
+              // Simulate API call with timeout
+              await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                  resolve(void 0);
+                }, 500);
+                
+                // Simulate occasional network failure for testing
+                if (Math.random() < 0.05) {
+                  clearTimeout(timeout);
+                  reject(new Error('Network error'));
+                }
+              });
+              
+              set((state) => {
+                const updateActivityParticipation = (activity: Activity) => {
+                  if (!activity.participantIds?.includes(userId) && 
+                      (activity.participantCount || 0) < activity.slotMax) {
+                    activity.participantIds = [...(activity.participantIds || []), userId];
+                    activity.participantCount = (activity.participantCount || 0) + 1;
+                    return true;
+                  }
+                  return false;
+                };
+
+                // Update in activities array
+                const activityIndex = state.activities.findIndex(act => act.id === activityId);
+                if (activityIndex !== -1) {
+                  updateActivityParticipation(state.activities[activityIndex]);
+                }
+                
+                // Update current activity if it matches
+                if (state.currentActivity?.id === activityId) {
+                  updateActivityParticipation(state.currentActivity);
+                }
+              });
+            } catch (error) {
+              console.error('Failed to join activity:', error);
+              throw error;
+            }
+          },
+
+          leaveActivity: async (activityId, userId) => {
+            try {
+              // Simulate API call
+              await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                  resolve(void 0);
+                }, 500);
+                
+                // Simulate occasional network failure for testing
+                if (Math.random() < 0.05) {
+                  clearTimeout(timeout);
+                  reject(new Error('Network error'));
+                }
+              });
+              
+              set((state) => {
+                const updateActivityParticipation = (activity: Activity) => {
+                  if (activity.participantIds?.includes(userId)) {
+                    activity.participantIds = activity.participantIds.filter(id => id !== userId);
+                    activity.participantCount = Math.max(0, (activity.participantCount || 0) - 1);
+                    return true;
+                  }
+                  return false;
+                };
+
+                // Update in activities array
+                const activityIndex = state.activities.findIndex(act => act.id === activityId);
+                if (activityIndex !== -1) {
+                  updateActivityParticipation(state.activities[activityIndex]);
+                }
+                
+                // Update current activity if it matches
+                if (state.currentActivity?.id === activityId) {
+                  updateActivityParticipation(state.currentActivity);
+                }
+              });
+            } catch (error) {
+              console.error('Failed to leave activity:', error);
+              throw error;
+            }
+          },
+
+          // Filter actions - with debouncing consideration
           setSearchText: (text) =>
             set((state) => {
               state.searchText = text;
@@ -326,13 +435,55 @@ export const useOptimizedStore = create<OptimizedStore>()(
           selectedTypes: state.selectedTypes,
           selectedGrades: state.selectedGrades,
         }),
+        // Add version and migration support
+        version: 1,
+        migrate: (persistedState: any, version: number) => {
+          console.log(`[Store] Migrating state from version ${version} to 1`);
+          
+          // Handle migration from older versions
+          if (version === 0 || !version) {
+            // Migration from version 0 (or no version) to version 1
+            return {
+              ...persistedState,
+              // Add any new default values or fix corrupted state
+              theme: persistedState.theme || 'light',
+              searchText: persistedState.searchText || '',
+              selectedTypes: Array.isArray(persistedState.selectedTypes) ? persistedState.selectedTypes : [],
+              selectedGrades: Array.isArray(persistedState.selectedGrades) ? persistedState.selectedGrades : [],
+              // Ensure user has proper notification preferences
+              user: persistedState.user ? {
+                ...persistedState.user,
+                notificationPreferences: persistedState.user.notificationPreferences || defaultNotificationPreferences,
+              } : null,
+            };
+          }
+          
+          return persistedState;
+        },
+        // Handle storage errors gracefully
+        onRehydrateStorage: () => {
+          return (_state, error) => {
+            if (error) {
+              console.error('[Store] Failed to rehydrate state:', error);
+              // Clear corrupted storage
+              localStorage.removeItem(STORAGE_KEYS.USER_PREFERENCES);
+            } else {
+              console.log('[Store] State rehydrated successfully');
+            }
+          };
+        },
       }
     ),
-    { name: 'ClimberDaz Store' }
-  )
+    { 
+      name: 'ClimberDaz Store',
+      // Only enable Redux DevTools in development
+      enabled: process.env.NODE_ENV === 'development',
+    }
+  ),
+  shallow
 );
 
-// Optimized Selectors (prevent unnecessary re-renders)
+// Optimized Selectors with shallow comparison to prevent unnecessary re-renders
 export const useUserSelector = () => useOptimizedStore((state) => ({
   user: state.user,
   allUsers: state.allUsers,
@@ -360,7 +511,15 @@ export const useAppSelector = () => useOptimizedStore((state) => ({
   isLoadingAnnouncements: state.isLoadingAnnouncements,
 }));
 
-// Action Selectors
+// Granular selectors for specific use cases
+export const useIsAuthenticated = () => useOptimizedStore((state) => state.isAuthenticated);
+export const useCurrentUser = () => useOptimizedStore((state) => state.user);
+export const useTheme = () => useOptimizedStore((state) => state.theme);
+export const useActivities = () => useOptimizedStore((state) => state.activities);
+export const useCurrentActivity = () => useOptimizedStore((state) => state.currentActivity);
+export const useSearchText = () => useOptimizedStore((state) => state.searchText);
+
+// Action Selectors - Memoized to prevent recreation
 export const useUserActions = () => useOptimizedStore((state) => ({
   setUser: state.setUser,
   logout: state.logout,
@@ -377,6 +536,8 @@ export const useActivityActions = () => useOptimizedStore((state) => ({
   addActivity: state.addActivity,
   updateActivity: state.updateActivity,
   removeActivity: state.removeActivity,
+  joinActivity: state.joinActivity,
+  leaveActivity: state.leaveActivity,
   setActivityLoading: state.setActivityLoading,
 }));
 
@@ -392,4 +553,18 @@ export const useAppActions = () => useOptimizedStore((state) => ({
   setError: state.setError,
   toggleTheme: state.toggleTheme,
   setAnnouncementLoading: state.setAnnouncementLoading,
-})); 
+}));
+
+// Performance monitoring for store (development only)
+if (process.env.NODE_ENV === 'development') {
+  useOptimizedStore.subscribe(
+    (state, prevState) => {
+      const changedKeys = Object.keys(state).filter(key => 
+        state[key as keyof typeof state] !== prevState[key as keyof typeof prevState]
+      );
+      if (changedKeys.length > 0) {
+        console.log('[Store Debug] State changed:', changedKeys);
+      }
+    }
+  );
+} 

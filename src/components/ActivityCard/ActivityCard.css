@@ -1,16 +1,381 @@
+/* Enhanced ActivityCard Styles with Modern Gradients */
 .activity-card {
-  margin-bottom: 12px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  /* Layout */
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
   position: relative;
+  overflow: hidden;
+  
+  /* Enhanced Shadow System */
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  
+  /* Smooth Animations */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  
+  /* Subtle border */
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Activity Type Gradient Indicators */
+.activity-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 16px 16px 0 0;
+  background: var(--activity-gradient, linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%));
+}
+
+/* Activity Type Specific Gradients */
+.activity-card.bouldering::before {
+  background: linear-gradient(135deg, #FF6B35 0%, #FF4757 100%);
+}
+
+.activity-card.sport::before {
+  background: linear-gradient(135deg, #3742FA 0%, #2F3542 100%);
+}
+
+.activity-card.outdoor::before {
+  background: linear-gradient(135deg, #28A745 0%, #20C997 100%);
+}
+
+.activity-card.lead::before {
+  background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%);
+}
+
+.activity-card.training::before {
+  background: linear-gradient(135deg, #FD79A8 0%, #E84393 100%);
+}
+
+.activity-card.top-rope::before {
+  background: linear-gradient(135deg, #00B894 0%, #00CEC9 100%);
+}
+
+/* Hover Effects */
+.activity-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 16px 40px rgba(255, 126, 95, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.1) inset;
+}
+
+.activity-card:hover::before {
+  height: 6px;
+}
+
+/* Active/Pressed State */
+.activity-card:active {
+  transform: translateY(-1px) scale(0.99);
+  transition-duration: 0.1s;
+}
+
+/* Card Header */
+.activity-card-header {
+  margin-bottom: 16px;
+}
+
+.activity-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1F2937;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.activity-card:active {
-  transform: scale(0.98);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+/* Activity Meta Info */
+.activity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
 }
+
+.activity-meta-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #6B7280;
+  gap: 4px;
+}
+
+.activity-meta-icon {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Activity Tags Container */
+.activity-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+/* Enhanced Tag Styles */
+.activity-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+}
+
+.activity-tag:hover {
+  transform: scale(1.05);
+}
+
+/* Tag Variants */
+.activity-tag.primary {
+  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.activity-tag.success {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+}
+
+.activity-tag.warning {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.activity-tag.secondary {
+  background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+  color: white;
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+}
+
+/* Card Footer */
+.activity-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+/* Host Info */
+.activity-host {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.host-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.host-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.host-level {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+/* Activity Status */
+.activity-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.participant-count {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.participant-count i {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+/* Status Indicators */
+.status-indicator {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-indicator.full {
+  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  color: white;
+}
+
+.status-indicator.started {
+  background: linear-gradient(135deg, #6B7280 0%, #4B5563 100%);
+  color: white;
+}
+
+.status-indicator.available {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+}
+
+/* Distance Display */
+.activity-distance {
+  font-size: 12px;
+  color: #6B7280;
+  font-weight: 500;
+  background: rgba(243, 244, 246, 0.8);
+  padding: 2px 6px;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+
+/* Cost Mode Styling */
+.cost-mode {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.cost-mode.free {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+}
+
+.cost-mode.aa {
+  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+  color: white;
+}
+
+.cost-mode.host-treat {
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .activity-card {
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+  
+  .activity-card-title {
+    font-size: 16px;
+  }
+  
+  .activity-meta-item {
+    font-size: 13px;
+  }
+  
+  .activity-tag {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+}
+
+/* Loading Animation */
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.activity-card.entering {
+  animation: card-enter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Skeleton Loading State */
+.activity-card.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Staggered Animation for Lists */
+.activity-card:nth-child(1) { animation-delay: 0.1s; }
+.activity-card:nth-child(2) { animation-delay: 0.2s; }
+.activity-card:nth-child(3) { animation-delay: 0.3s; }
+.activity-card:nth-child(4) { animation-delay: 0.4s; }
+.activity-card:nth-child(5) { animation-delay: 0.5s; }
+
+/* Gradient Overlay for Special States */
+.activity-card.featured::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 126, 95, 0.05) 0%,
+    rgba(255, 69, 114, 0.05) 100%
+  );
+  pointer-events: none;
+  border-radius: 16px;
+}
+
+/* Activity Type Color Classes */
+.activity-card.type-bouldering { --activity-gradient: linear-gradient(135deg, #FF6B35 0%, #FF4757 100%); }
+.activity-card.type-sport { --activity-gradient: linear-gradient(135deg, #3742FA 0%, #2F3542 100%); }
+.activity-card.type-outdoor { --activity-gradient: linear-gradient(135deg, #28A745 0%, #20C997 100%); }
+.activity-card.type-lead { --activity-gradient: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 100%); }
+.activity-card.type-training { --activity-gradient: linear-gradient(135deg, #FD79A8 0%, #E84393 100%); }
+.activity-card.type-top-rope { --activity-gradient: linear-gradient(135deg, #00B894 0%, #00CEC9 100%); }
 
 .activity-card-header {
   display: flex;

@@ -4,16 +4,15 @@ import { useUserActions } from '../../store/useOptimizedStore';
 import { showSuccess, showError } from '../../utils/notifications';
 import { VALIDATION_RULES, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../utils/constants';
 import { mockUsers } from '../../data/mockData';
+import { colors, shadows } from '../../utils/designSystem';
 import type { User } from '../../types';
 import './Login.css';
 
 /**
- * Optimized Login Component
- * - Uses new notification system instead of alert()
- * - Leverages centralized constants for validation
- * - Uses optimized store selectors
- * - Better error handling and type safety
- * - Improved accessibility
+ * Optimized Login Component with Climbing-Inspired Design
+ * - Modern gradient-based design system
+ * - Climbing-themed branding and colors
+ * - Enhanced visual hierarchy and animations
  */
 
 const Login: React.FC = () => {
@@ -24,7 +23,6 @@ const Login: React.FC = () => {
   const [nickname, setNickname] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Memoized validation function
   const validateNickname = useCallback((value: string): string | null => {
     const trimmed = value.trim();
     
@@ -47,7 +45,6 @@ const Login: React.FC = () => {
     const value = e.target.value;
     setNickname(value);
     
-    // Clear error when user starts typing
     if (error) {
       setError(null);
     }
@@ -67,10 +64,8 @@ const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       
-      // Create mock user (in real app, this would come from API)
       const mockUser: User = {
         openid: `mock_${Date.now()}`,
         nickname: nickname.trim(),
@@ -86,7 +81,6 @@ const Login: React.FC = () => {
       setUser(mockUser);
       showSuccess(SUCCESS_MESSAGES.LOGIN_SUCCESS);
       
-      // Navigate after a short delay to allow toast to show
       setTimeout(() => navigate('/', { replace: true }), 500);
       
     } catch (error) {
@@ -99,47 +93,95 @@ const Login: React.FC = () => {
   }, [nickname, validateNickname, setUser, navigate]);
 
   return (
-    <div className="login-page flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="login-container bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <div className="app-logo text-center mb-8">
-          <div className="logo-icon text-6xl mb-2" role="img" aria-label="攀岩图标">
-            🧗
+    <div 
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{
+        background: `linear-gradient(135deg, ${colors.primary[50]} 0%, ${colors.secondary[50]} 30%, ${colors.primary[100]} 70%, ${colors.secondary[100]} 100%)`,
+      }}
+    >
+      <div 
+        className="w-full max-w-md p-8 rounded-3xl backdrop-blur-lg"
+        style={{
+          background: `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)`,
+          boxShadow: `${shadows.large}, inset 0 1px 0 rgba(255, 255, 255, 0.8)`,
+          border: `1px solid rgba(255, 255, 255, 0.3)`,
+        }}
+      >
+        {/* Enhanced App Logo */}
+        <div className="text-center mb-8">
+          <div 
+            className="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 text-4xl"
+            style={{
+              background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
+              boxShadow: shadows.medium,
+            }}
+          >
+            🧗‍♀️
           </div>
-          <h1 className="app-name text-3xl font-bold text-gray-800">ClimberDaz</h1>
-          <p className="app-tagline text-gray-600">找到你的攀岩搭子</p>
+          <h1 
+            className="text-4xl font-bold mb-2 bg-gradient-to-r bg-clip-text text-transparent"
+            style={{
+              backgroundImage: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[600]} 100%)`,
+            }}
+          >
+            ClimberDaz
+          </h1>
+          <p 
+            className="text-lg font-medium"
+            style={{ color: colors.neutral[600] }}
+          >
+            🏔️ 找到你的攀岩搭子
+          </p>
         </div>
 
-        <form onSubmit={handleLogin} className="login-form space-y-6" noValidate>
+        <form onSubmit={handleLogin} className="space-y-6" noValidate>
           <div>
             <label 
               htmlFor="nickname" 
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-semibold mb-2"
+              style={{ color: colors.neutral[700] }}
             >
-              昵称
+              攀岩昵称
             </label>
             <input 
               type="text"
               id="nickname"
               name="nickname"
-              placeholder="请输入你的昵称"
+              placeholder="输入你的攀岩昵称..."
               disabled={loading}
               value={nickname}
               onChange={handleNicknameChange}
               aria-invalid={!!error}
               aria-describedby={error ? "nickname-error" : undefined}
-              className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 sm:text-sm transition-colors ${
-                error 
-                  ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
-                  : 'border-gray-300 focus:ring-indigo-500 focus:border-indigo-500'
-              }`}
               maxLength={VALIDATION_RULES.NICKNAME.MAX_LENGTH}
+              className="w-full px-4 py-4 text-lg font-medium rounded-2xl transition-all duration-300 ease-smooth focus:outline-none focus:ring-4 placeholder-neutral-400"
+              style={{
+                background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
+                border: error 
+                  ? `2px solid ${colors.error.primary}` 
+                  : `2px solid ${colors.neutral[200]}`,
+                backdropFilter: 'blur(10px)',
+                boxShadow: shadows.soft,
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = error ? colors.error.primary : colors.primary[400];
+                e.target.style.boxShadow = error 
+                  ? `0 0 0 4px ${colors.error.subtle}` 
+                  : `0 0 0 4px ${colors.primary[100]}`;
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = error ? colors.error.primary : colors.neutral[200];
+                e.target.style.boxShadow = shadows.soft;
+              }}
             />
             {error && (
               <p 
                 id="nickname-error" 
-                className="text-red-500 text-xs mt-1" 
+                className="text-sm font-medium mt-2 flex items-center gap-2" 
+                style={{ color: colors.error.primary }}
                 role="alert"
               >
+                <span>⚠️</span>
                 {error}
               </p>
             )}
@@ -148,25 +190,44 @@ const Login: React.FC = () => {
           <button 
             type="submit" 
             disabled={loading || !nickname.trim()}
-            className="login-button w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full py-4 px-6 text-lg font-bold text-white rounded-2xl transition-all duration-300 ease-smooth hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4"
+            style={{
+              background: loading || !nickname.trim()
+                ? `linear-gradient(135deg, ${colors.neutral[400]} 0%, ${colors.neutral[500]} 100%)`
+                : `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
+              boxShadow: loading || !nickname.trim() ? shadows.soft : shadows.medium,
+            }}
           >
             {loading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <span className="flex items-center justify-center gap-3">
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                登录中...
+                正在攀登中...
               </span>
             ) : (
-              '立即开始'
+              <span className="flex items-center justify-center gap-2">
+                🚀 开始攀岩之旅
+              </span>
             )}
           </button>
         </form>
 
-        <div className="login-tips text-center mt-8 text-sm text-gray-500">
-          <p>💡 真实版本将使用微信授权登录</p>
-          <p>现在只需输入昵称即可体验</p>
+        <div 
+          className="text-center mt-8 p-4 rounded-2xl backdrop-blur-sm"
+          style={{
+            background: `linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.4) 100%)`,
+            border: `1px solid rgba(255, 255, 255, 0.3)`,
+          }}
+        >
+          <p className="text-sm font-medium mb-2" style={{ color: colors.neutral[600] }}>
+            💡 体验提示
+          </p>
+          <p className="text-xs" style={{ color: colors.neutral[500] }}>
+            真实版本将使用微信授权登录<br />
+            现在只需输入昵称即可体验所有功能
+          </p>
         </div>
       </div>
     </div>
