@@ -6,9 +6,12 @@ import React from 'react';
  */
 
 interface NotificationConfig {
-  content: string;
+  content?: string; // Made optional to support flexible usage
   type?: 'success' | 'error' | 'warning' | 'info';
   duration?: number;
+  title?: string;
+  message?: string;
+  actions?: any[];
 }
 
 class NotificationManager {
@@ -100,5 +103,8 @@ export const useNotifications = () => {
 
   return { notifications, showToast, showSuccess, showError, showWarning, showInfo };
 };
+
+// Named export for compatibility
+export { notificationManager };
 
 export default notificationManager; 

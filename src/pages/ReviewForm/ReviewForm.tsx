@@ -1,403 +1,291 @@
-import React, { useState, FormEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-// import {
-//   NavBar,
-//   Form,
-//   Button,
-//   TextArea,
-//   Card,
-//   Toast,
-//   Dialog,
-//   Space,
-// } from 'antd-mobile'; // Removed
-import { useUserSelector } from '../../store/useOptimizedStore';
-import { showSuccess, showError, showWarning } from '../../utils/notifications';
-import { SUCCESS_MESSAGES, ERROR_MESSAGES, VALIDATION_RULES } from '../../utils/constants';
-import { UserAvatar } from '../../components'; // Assuming this is a refactored component
-import { colors, shadows } from '../../utils/designSystem';
-import { ReviewStatus } from '../../types';
+import { useStore } from '../../store/useStore';
+import { default as Button } from '../../components/Button/Button';
+import { default as TextArea } from '../../components/TextArea/TextArea';
+import { default as UserAvatar } from '../../components/UserAvatar/UserAvatar';
+import { toast } from 'react-toastify';
 
-// Mock data for the user being reviewed (remains for now)
-const mockRevieweeData = {
-  openid: 'user2',
-  nickname: 'Alice',
-  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alice',
-};
 
-// Enhanced Back Arrow Icon
-const BackIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
-// Enhanced PageHeader component
-interface PageHeaderProps {
-  title: string;
-  onBack?: () => void;
+export interface ReviewTarget {
+  id: string;
+  name: string;
+  avatar?: string;
+  activityTitle: string;
+  activityDate: Date;
 }
-const EnhancedPageHeader: React.FC<PageHeaderProps> = ({ title, onBack }) => (
-  <div 
-    className="sticky top-0 z-10 mb-6 backdrop-blur-lg"
-    style={{
-      background: `linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)`,
-      border: `1px solid rgba(255, 255, 255, 0.3)`,
-      boxShadow: shadows.medium,
-    }}
-  >
-    <div className="px-6 py-4">
-      <div className="relative flex items-center justify-center">
-        {onBack && (
-          <button 
-            onClick={onBack} 
-            className="absolute left-0 p-2 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
-            style={{
-              background: `linear-gradient(135deg, ${colors.neutral[100]} 0%, ${colors.neutral[200]} 100%)`,
-              color: colors.primary[600],
-            }}
-          >
-            <BackIcon />
-          </button>
-        )}
-        <h1 
-          className="text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-          style={{
-            backgroundImage: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.secondary[600]} 100%)`,
-          }}
-        >
-          ⭐ {title}
-        </h1>
-      </div>
-    </div>
-  </div>
-);
 
-// Enhanced TextArea component
-interface FormTextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  label: string;
-  helpText?: string;
-  showCount?: boolean;
-  error?: string;
+export type ReviewRating = 'GOOD' | 'BAD' | 'GHOST' | 'SKIP';
+
+interface ReviewFormData {
+  rating: ReviewRating;
+  comment: string;
 }
-const EnhancedFormTextArea: React.FC<FormTextAreaProps> = ({ label, name, helpText, showCount, maxLength, value, error, ...props }) => (
-  <div className="mb-6">
-    <label htmlFor={name} className="block text-sm font-semibold mb-2" style={{ color: colors.neutral[700] }}>
-      {label}
-    </label>
-    {helpText && (
-      <p className="text-xs mb-2" style={{ color: colors.neutral[500] }}>
-        {helpText}
-      </p>
-    )}
-    <textarea
-      id={name}
-      name={name}
-      value={value}
-      maxLength={maxLength}
-      {...props}
-      className="block w-full px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-300 ease-smooth focus:outline-none focus:ring-4 backdrop-blur-sm"
-      style={{
-        background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
-        border: error 
-          ? `2px solid ${colors.error.primary}` 
-          : `2px solid ${colors.neutral[200]}`,
-        backdropFilter: 'blur(10px)',
-        boxShadow: shadows.soft,
-      }}
-      onFocus={(e) => {
-        e.target.style.borderColor = error ? colors.error.primary : colors.primary[400];
-        e.target.style.boxShadow = error 
-          ? `0 0 0 4px ${colors.error.subtle}` 
-          : `0 0 0 4px ${colors.primary[100]}`;
-      }}
-      onBlur={(e) => {
-        e.target.style.borderColor = error ? colors.error.primary : colors.neutral[200];
-        e.target.style.boxShadow = shadows.soft;
-      }}
-    />
-    <div className="flex justify-between items-center">
-        {error && (
-          <p className="mt-2 text-xs font-medium flex items-center gap-1" style={{ color: colors.error.primary }}>
-            <span>⚠️</span>
-            {error}
-          </p>
-        )}
-        {showCount && maxLength && (
-        <p className={`mt-2 text-xs font-medium ml-auto ${error ? '' : ''}`} style={{ color: error ? colors.error.primary : colors.neutral[500] }}>
-            {String(value)?.length || 0} / {maxLength}
-        </p>
-        )}
-    </div>
-  </div>
-);
 
-const ReviewForm: React.FC = () => {
-  const { activityId } = useParams<{ activityId: string; userId: string }>();
+export const ReviewForm: React.FC = () => {
+  const { activityId, targetId } = useParams<{ activityId: string; targetId: string }>();
   const navigate = useNavigate();
-  const { user: currentUser } = useUserSelector();
+  const { user } = useStore();
   
-  const [comment, setComment] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<ReviewStatus | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ comment?: string; status?: string }>({});
+  const [target, setTarget] = useState<ReviewTarget | null>(null);
+  const [formData, setFormData] = useState<ReviewFormData>({
+    rating: 'SKIP',
+    comment: ''
+  });
+  const [isSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleBack = () => navigate(-1);
+  useEffect(() => {
+    // TODO: Replace with actual API call
+    // For now, using mock data
+    if (activityId && targetId) {
+      setTarget({
+        id: targetId,
+        name: '攀岩伙伴',
+        avatar: '/images/default-avatar.jpg',
+        activityTitle: '周末欢乐抱石局',
+        activityDate: new Date()
+      });
+    }
+  }, [activityId, targetId]);
 
-  const validateForm = () => {
-    const newErrors: { comment?: string; status?: string } = {};
-    if (!selectedStatus) {
-      newErrors.status = '请选择一个评价状态';
-    }
-    if (comment.length > VALIDATION_RULES.COMMENT.MAX_LENGTH) {
-      newErrors.comment = `评价内容不能超过${VALIDATION_RULES.COMMENT.MAX_LENGTH}字`;
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleRatingChange = (rating: ReviewRating) => {
+    setFormData(prev => ({ ...prev, rating }));
+    setError(null);
   };
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) {
-        if (!selectedStatus) {
-          showWarning('请选择一个评价状态');
-        }
-        return;
-    }
+  const handleCommentChange = (comment: string) => {
+    setFormData(prev => ({ ...prev, comment }));
+  };
 
-    if (!currentUser) {
-      showError(ERROR_MESSAGES.UNAUTHORIZED);
-      navigate('/login');
+  const handleSubmit = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+    e?.preventDefault();
+    
+    if (!activityId) {
+      toast.error('Activity ID is missing');
       return;
     }
-
-    setLoading(true);
+    
+    if (!user) {
+      toast.error('User not authenticated');
+      return;
+    }
+    
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await fetch(`/api/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          activityId,
+          reviewType: formData.rating,
+          comment: formData.comment.trim() || undefined,
+          rating: formData.rating === 'GOOD' ? 5 : formData.rating === 'BAD' ? 1 : 3
+        }),
+      });
       
-      showSuccess(SUCCESS_MESSAGES.REVIEW_SUBMITTED);
-      navigate(`/activity/${activityId}`);
+      if (!response.ok) {
+        throw new Error('Failed to submit review');
+      }
+      
+      toast.success('Review submitted successfully!');
+      navigate('/my-activities');
     } catch (error) {
-      showError(ERROR_MESSAGES.SERVER_ERROR);
-      console.error('Review submission error:', error);
-    } finally {
-      setLoading(false);
+      toast.error('Failed to submit review. Please try again.');
     }
   };
 
-  const handleSkip = async () => {
-    if (window.confirm('确定要跳过评价吗？跳过后将无法再次评价。')) {
-      navigate(-1); // Navigate back
-    }
-  };
-
-  const reviewStatusOptions = [
-    { label: '👍 表现很好', value: ReviewStatus.GOOD, type: 'success' as const },
-    { label: '👎 有待改进', value: ReviewStatus.BAD, type: 'error' as const },
-    { label: '😕 未到场', value: ReviewStatus.NO_SHOW, type: 'warning' as const },
-  ];
-
-  const getOptionStyle = (type: 'success' | 'error' | 'warning', isActive: boolean) => {
-    if (isActive) {
-      switch (type) {
-        case 'success':
-          return {
-            background: `linear-gradient(135deg, ${colors.success.primary} 0%, ${colors.success.secondary} 100%)`,
-            color: 'white',
-            border: `2px solid ${colors.success.primary}`,
-          };
-        case 'error':
-          return {
-            background: `linear-gradient(135deg, ${colors.error.primary} 0%, ${colors.error.secondary} 100%)`,
-            color: 'white',
-            border: `2px solid ${colors.error.primary}`,
-          };
-        case 'warning':
-          return {
-            background: `linear-gradient(135deg, ${colors.warning.primary} 0%, ${colors.warning.secondary} 100%)`,
-            color: 'white',
-            border: `2px solid ${colors.warning.primary}`,
-          };
+  const getRatingConfig = (rating: ReviewRating) => {
+    const configs = {
+      GOOD: {
+        label: '好评',
+        icon: '👍',
+        description: '这位伙伴表现很棒',
+        gradient: 'from-green-400 to-emerald-500',
+        bgColor: 'bg-green-50',
+        textColor: 'text-green-700'
+      },
+      BAD: {
+        label: '差评',
+        icon: '👎',
+        description: '体验不太好',
+        gradient: 'from-red-400 to-rose-500',
+        bgColor: 'bg-red-50',
+        textColor: 'text-red-700'
+      },
+      GHOST: {
+        label: '鸽子',
+        icon: '🕊️',
+        description: '临时取消或爽约',
+        gradient: 'from-gray-400 to-slate-500',
+        bgColor: 'bg-gray-50',
+        textColor: 'text-gray-700'
+      },
+      SKIP: {
+        label: '跳过',
+        icon: '⏭️',
+        description: '不了解，不评价',
+        gradient: 'from-blue-400 to-indigo-500',
+        bgColor: 'bg-blue-50',
+        textColor: 'text-blue-700'
       }
-    } else {
-      switch (type) {
-        case 'success':
-          return {
-            background: `linear-gradient(135deg, ${colors.success.subtle} 0%, rgba(255, 255, 255, 0.8) 100%)`,
-            color: colors.success.primary,
-            border: `2px solid ${colors.success.soft}`,
-          };
-        case 'error':
-          return {
-            background: `linear-gradient(135deg, ${colors.error.subtle} 0%, rgba(255, 255, 255, 0.8) 100%)`,
-            color: colors.error.primary,
-            border: `2px solid ${colors.error.soft}`,
-          };
-        case 'warning':
-          return {
-            background: `linear-gradient(135deg, ${colors.warning.subtle} 0%, rgba(255, 255, 255, 0.8) 100%)`,
-            color: colors.warning.primary,
-            border: `2px solid ${colors.warning.soft}`,
-          };
-      }
-    }
+    };
+    return configs[rating];
   };
+
+  if (!target) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">加载中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div 
-      className="min-h-screen"
-      style={{
-        background: `linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%)`,
-      }}
-    >
-      <EnhancedPageHeader title="互评参与者" onBack={handleBack} />
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50">
+      <div className="container mx-auto px-4 py-6">
+        {/* Header */}
+        <div className="mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-gray-600 hover:text-gray-800 mb-4"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            返回
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">评价活动伙伴</h1>
+        </div>
 
-      <div className="px-6 space-y-6">
-        {/* Enhanced Reviewee Info Card */}
-        <div 
-          className="p-6 rounded-2xl backdrop-blur-sm"
-          style={{
-            background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
-            boxShadow: shadows.card,
-            border: `1px solid rgba(255, 255, 255, 0.3)`,
-          }}
-        >
-          <div className="flex items-center gap-4">
-            <UserAvatar
-              avatar={mockRevieweeData.avatar}
-              nickname={mockRevieweeData.nickname}
-              size={64}
-            />
-            <div>
-              <h3 className="text-xl font-bold mb-1" style={{ color: colors.neutral[800] }}>
-                {mockRevieweeData.nickname}
-              </h3>
-              <p className="text-sm font-medium" style={{ color: colors.neutral[600] }}>
-                🎯 对本次活动的参与情况做出评价
+        {/* Target User Info */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <div className="flex items-center mb-4">
+            <UserAvatar avatar={target.avatar} nickname={target.name} size="lg" />
+            <div className="ml-4">
+              <h2 className="text-lg font-semibold text-gray-900">{target.name}</h2>
+              <p className="text-gray-600">{target.activityTitle}</p>
+              <p className="text-sm text-gray-500">
+                {target.activityDate.toLocaleDateString('zh-CN')}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Rating Selection Card */}
-        <div 
-          className="p-6 rounded-2xl backdrop-blur-sm"
-          style={{
-            background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
-            boxShadow: shadows.card,
-            border: `1px solid rgba(255, 255, 255, 0.3)`,
-          }}
-        >
-          <h3 className="text-lg font-bold text-center mb-4" style={{ color: colors.neutral[700] }}>
-            ⭐ 选择评价状态
-          </h3>
-          {errors.status && (
-            <p className="text-sm font-medium text-center mb-4 flex items-center justify-center gap-2" style={{ color: colors.error.primary }}>
-              <span>⚠️</span>
-              {errors.status}
-            </p>
-          )}
-          <div className="space-y-3">
-            {reviewStatusOptions.map(opt => {
-              const isActive = selectedStatus === opt.value;
+        {/* Rating Selection */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">请选择评价类型</h3>
+          
+          <div className="grid grid-cols-2 gap-3">
+            {(['GOOD', 'BAD', 'GHOST', 'SKIP'] as ReviewRating[]).map((rating) => {
+              const config = getRatingConfig(rating);
+              const isSelected = formData.rating === rating;
+              
               return (
                 <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => { 
-                    setSelectedStatus(opt.value); 
-                    setErrors(prev => ({...prev, status: undefined})); 
-                  }}
-                  className="w-full py-4 px-6 text-sm font-bold rounded-2xl transition-all duration-300 ease-smooth hover:scale-[1.02] active:scale-95 backdrop-blur-sm"
-                  style={getOptionStyle(opt.type, isActive)}
+                  key={rating}
+                  onClick={() => handleRatingChange(rating)}
+                  className={`p-4 rounded-xl border-2 transition-all duration-200 ${
+                    isSelected
+                      ? `border-transparent bg-gradient-to-r ${config.gradient} text-white shadow-lg`
+                      : `border-gray-200 hover:border-gray-300 ${config.bgColor} ${config.textColor}`
+                  }`}
                 >
-                  {opt.label}
+                  <div className="text-center">
+                    <div className="text-2xl mb-2">{config.icon}</div>
+                    <div className="font-semibold mb-1">{config.label}</div>
+                    <div className={`text-xs ${isSelected ? 'text-white/80' : 'text-gray-600'}`}>
+                      {config.description}
+                    </div>
+                  </div>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Enhanced Comment Card */}
-        <div 
-          className="p-6 rounded-2xl backdrop-blur-sm"
-          style={{
-            background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
-            boxShadow: shadows.card,
-            border: `1px solid rgba(255, 255, 255, 0.3)`,
-          }}
-        >
-          <form onSubmit={handleSubmit}>
-            <EnhancedFormTextArea
-              label="💬 补充说明 (选填)"
-              name="comment"
-              placeholder="分享更多细节，你的评价对其他岩友很有帮助..."
+        {/* Comment Section */}
+        {formData.rating !== 'SKIP' && (
+          <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              补充说明 <span className="text-sm font-normal text-gray-500">(可选)</span>
+            </h3>
+            
+            <TextArea
+              value={formData.comment}
+              onChange={handleCommentChange}
+              placeholder={
+                formData.rating === 'GOOD' 
+                  ? '分享一下这次愉快的攀岩体验...'
+                  : formData.rating === 'BAD'
+                  ? '说说遇到的问题，帮助改进...'
+                  : '详细说明情况...'
+              }
+              maxLength={500}
               rows={4}
-              maxLength={80}
-              showCount
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              helpText="例如：守时情况、技术水平、团队合作、安全意识等方面的表现。"
-              error={errors.comment}
+              className="w-full"
             />
-          </form>
-        </div>
-        
-        {/* Enhanced Action Buttons */}
-        <div className="space-y-4 pb-8">
-          <button
-            type="submit"
+            
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-xs text-gray-500">
+                {formData.rating === 'GOOD' && '好评可以鼓励伙伴继续保持'}
+                {formData.rating === 'BAD' && '差评需要提供具体原因'}
+                {formData.rating === 'GHOST' && '请简要说明具体情况'}
+              </span>
+              <span className="text-xs text-gray-400">
+                {formData.comment.length}/500
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+            <div className="flex items-center">
+              <div className="text-red-600 mr-3">⚠️</div>
+              <div className="text-red-700">{error}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Submit Button */}
+        <div className="sticky bottom-4">
+          <Button
             onClick={handleSubmit}
-            disabled={loading || !selectedStatus}
-            className="w-full py-4 px-6 text-lg font-bold text-white rounded-2xl transition-all duration-300 ease-smooth hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-            style={{
-              background: loading || !selectedStatus
-                ? `linear-gradient(135deg, ${colors.neutral[400]} 0%, ${colors.neutral[500]} 100%)`
-                : `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
-              boxShadow: loading || !selectedStatus ? shadows.soft : shadows.medium,
-            }}
+            disabled={isSubmitting}
+            variant="primary"
+            className="w-full h-12 text-lg font-semibold shadow-lg"
           >
-            {loading && (
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+            {isSubmitting ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                提交中...
+              </div>
+            ) : (
+              '提交评价'
             )}
-            {loading ? '⏳ 提交中...' : '🚀 提交评价'}
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleSkip}
-            disabled={loading}
-            className="w-full py-4 px-6 text-lg font-bold rounded-2xl transition-all duration-300 ease-smooth hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
-            style={{
-              background: `linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%)`,
-              color: colors.neutral[600],
-              border: `2px solid ${colors.neutral[300]}`,
-            }}
-          >
-            ⏭️ 以后再说 (跳过)
-          </button>
+          </Button>
         </div>
 
-        {/* Enhanced Review Tips */}
-        <div 
-          className="p-6 rounded-2xl text-center backdrop-blur-sm"
-          style={{
-            background: `linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.4) 100%)`,
-            border: `1px solid rgba(255, 255, 255, 0.3)`,
-          }}
-        >
-          <p className="text-sm font-medium mb-2" style={{ color: colors.neutral[600] }}>
-            💡 温馨提示
-          </p>
-          <p className="text-xs mb-1" style={{ color: colors.neutral[500] }}>
-            评价提交后不可修改
-          </p>
-          <p className="text-xs" style={{ color: colors.neutral[500] }}>
-            您的评价将帮助我们维护友好的攀岩社区环境 🏔️
-          </p>
+        {/* Information Note */}
+        <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+          <div className="flex items-start">
+            <div className="text-blue-600 mr-3 mt-0.5">ℹ️</div>
+            <div className="text-sm text-blue-800">
+              <p className="font-medium mb-1">评价说明</p>
+              <ul className="space-y-1 text-blue-700">
+                <li>• 评价将在活动结束后 48 小时内有效</li>
+                <li>• 评价一旦提交无法修改，请慎重选择</li>
+                <li>• 恶意评价将被系统标记，影响信誉度</li>
+                <li>• 选择"跳过"不会影响双方信誉</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </div>

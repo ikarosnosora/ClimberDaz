@@ -7,8 +7,10 @@ interface UserSlice {
   user: User | null;
   allUsers: User[];
   isAuthenticated: boolean;
+  isLoading: boolean;
   setUser: (user: User | null) => void;
   setAllUsers: (users: User[]) => void;
+  setUserLoading: (loading: boolean) => void;
   updateUserStatus: (userId: string, updates: Partial<Pick<User, 'isBanned' | 'role'>>) => void;
   updateUserPreferences: (preferences: Partial<UserNotificationPreferences>) => void;
   updateUserProfile: (profileData: Partial<Pick<User, 'nickname' | 'avatar' | 'climbingAge' | 'introduction' | 'city' | 'frequentlyVisitedGyms' | 'climbingPreferences' | 'gearTags'>>) => void;
@@ -18,8 +20,10 @@ interface UserSlice {
 interface ActivitySlice {
   activities: Activity[];
   currentActivity: Activity | null;
+  activitiesLoading: boolean;
   setActivities: (activities: Activity[]) => void;
   setCurrentActivity: (activity: Activity | null) => void;
+  setActivitiesLoading: (loading: boolean) => void;
   addActivity: (activity: Activity) => void;
   updateActivity: (id: string, updates: Partial<Activity>) => void;
   removeActivity: (id: string) => void;
@@ -47,7 +51,7 @@ interface ActivityListFiltersSlice {
 
 export interface StoreState extends UserSlice, ActivitySlice, AppSlice, ActivityListFiltersSlice {}
 
-// Mock users for admin panel demonstration
+// Mock users for admin panel demonstration (will be replaced with API data)
 const mockAdminUsers: User[] = [
   { openid: 'user1', nickname: 'RockClimber', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=RockClimber', gearTags: ['SHOES' as GearType], createdAt: new Date(), role: 'user', isBanned: false, climbingAge: 3, city: '北京', frequentlyVisitedGyms: ['岩时攀岩馆（望京店）'], climbingPreferences: ['BOULDERING' as ActivityType] },
   { openid: 'user2', nickname: 'NewbieClimber', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=NewbieClimber', gearTags: [], createdAt: new Date(), role: 'user', isBanned: false, climbingAge: 1, city: '上海' },
@@ -73,6 +77,7 @@ export const useStore = create<StoreState>()(
             notificationPreferences: u.notificationPreferences || defaultNotificationPreferences,
         })),
         isAuthenticated: false,
+        isLoading: false,
         setUser: (user) =>
           set({
             user: user ? {
@@ -99,6 +104,7 @@ export const useStore = create<StoreState>()(
             role: u.role || 'user',
             notificationPreferences: u.notificationPreferences || defaultNotificationPreferences,
         })) }),
+        setUserLoading: (loading) => set({ isLoading: loading }),
         updateUserStatus: (userId, updates) => 
           set((state) => ({
             allUsers: state.allUsers.map((u) => 
@@ -141,14 +147,17 @@ export const useStore = create<StoreState>()(
           set({
             user: null,
             isAuthenticated: false,
+            isLoading: false,
           }),
 
         // Activity slice
         activities: [],
         currentActivity: null,
+        activitiesLoading: false,
         setActivities: (activities) => set({ activities }),
         setCurrentActivity: (activity) =>
           set({ currentActivity: activity }),
+        setActivitiesLoading: (loading) => set({ activitiesLoading: loading }),
         addActivity: (activity) =>
           set((state) => ({
             activities: [activity, ...state.activities],
@@ -196,9 +205,33 @@ export const useStore = create<StoreState>()(
           activityListSearchText: state.activityListSearchText,
           activityListSelectedTypes: state.activityListSelectedTypes,
           activityListSelectedGrades: state.activityListSelectedGrades,
-          allUsers: state.allUsers,
+          // Note: Removed allUsers from persistence as it should come from API
         }),
+        version: 2, // Increment version to clear old persisted data
       }
-    )
+    ),
+    {
+      name: 'climberdaz-store',
+    }
   )
-); 
+);
+
+// Export typed selectors and actions for optimized access
+export const useUserActions = () => useStore((state) => ({
+  setUser: state.setUser,
+  setAllUsers: state.setAllUsers,
+  setUserLoading: state.setUserLoading,
+  updateUserStatus: state.updateUserStatus,
+  updateUserPreferences: state.updateUserPreferences,
+  updateUserProfile: state.updateUserProfile,
+  logout: state.logout,
+}));
+
+export const useActivityActions = () => useStore((state) => ({
+  setActivities: state.setActivities,
+  setCurrentActivity: state.setCurrentActivity,
+  setActivitiesLoading: state.setActivitiesLoading,
+  addActivity: state.addActivity,
+  updateActivity: state.updateActivity,
+  removeActivity: state.removeActivity,
+})); 

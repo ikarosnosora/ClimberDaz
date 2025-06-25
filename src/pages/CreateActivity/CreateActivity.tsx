@@ -1,33 +1,17 @@
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useActivityActions, useUserSelector } from '../../store/useOptimizedStore';
-import { showSuccess, showError } from '../../utils/notifications';
-import dayjs from 'dayjs';
-import {
-  Activity,
-  ActivityFormData,
-  MeetMode,
-  CostMode,
-  User,
-  ActivityType,
-  ActivityStatus,
+import { 
+  ActivityType, 
+  MeetMode, 
+  CostMode, 
+  DifficultyGrade
 } from '../../types';
+import { useStore } from '../../store/useStore';
+import { ClimbingGymSelector } from '../../components/ClimbingGymSelector/ClimbingGymSelector';
+import { toast } from 'react-toastify';
 import './CreateActivity.css';
-import {
-  V_SCALE_GRADES,
-  YDS_GRADES,
-  activityTypeDetails,
-} from '../../constants/climbingData';
-import 'leaflet/dist/leaflet.css';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
 
 // Modern SVG Icon Components
-const CloseIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
 
 const BackIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -42,11 +26,7 @@ const LocationIcon = () => (
   </svg>
 );
 
-const MapIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
-  </svg>
-);
+
 
 const ClockIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -73,12 +53,7 @@ const DocumentIcon = () => (
   </svg>
 );
 
-const SettingsIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-);
+
 
 const SparklesIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -86,19 +61,18 @@ const SparklesIcon = () => (
   </svg>
 );
 
-// Import Leaflet images directly
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+// Import Leaflet images directly - commented out as not used currently
+// import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+// import markerIcon from 'leaflet/dist/images/marker-icon.png';
+// import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// Fix for default Leaflet marker icon issue with webpack
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+// TODO: Fix for default Leaflet marker icon issue with webpack when map is implemented
+// delete (L.Icon.Default.prototype as any)._getIconUrl;
+// L.Icon.Default.mergeOptions({
+//   iconRetinaUrl: markerIcon2x,
+//   iconUrl: markerIcon,
+//   shadowUrl: markerShadow,
+// });
 
 const VENUES = [
   { label: '岩时攀岩馆（望京店）', value: 'yanhshi_wangjing', lat: 39.9884, lng: 116.4716 },
@@ -118,285 +92,82 @@ const activityTypeOptions = [
   { value: ActivityType.TRAINING, label: '训练 💪', icon: '💪' },
 ];
 
-interface CreateActivityProps {
-  // Remove onClose prop since this is now a page
+// Define proper form data interface
+interface ActivityFormData {
+  title: string;
+  description: string;
+  types: ActivityType[];
+  grades: DifficultyGrade[];
+  slotMax: number;
+  meetMode: MeetMode;
+  costMode: CostMode;
+  cost: number;
+  isPrivate: boolean;
+  selectedGym: any | null; // Using any for now to avoid type issues
 }
 
-// initialFormValues now aligns with ActivityFormData fields, excluding date/time strings
-const initialFormValues: Omit<ActivityFormData, 'datetime'> & { lat?: number; lng?: number; grades: string[] } = {
-  title: '',
-  locationText: '',
-  description: '',
-  types: [],
-  grades: [], // Ensure grades is always an array
-  slotMax: 2,
-  meetMode: MeetMode.MEET_AT_ENTRANCE,
-  costMode: CostMode.AA,
-  isPrivate: false,
-  lat: undefined, // Changed from null
-  lng: undefined, // Changed from null
-};
 
-const CreateActivity: React.FC<CreateActivityProps> = () => {
+
+export const CreateActivity: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useUserSelector();
-  const { addActivity: storeAddActivity } = useActivityActions();
-  const [loading, setLoading] = useState(false);
+  const { user, activities, setActivities } = useStore();
   
-  const [formValues, setFormValues] = useState(initialFormValues);
+  const [formValues, setFormValues] = useState<ActivityFormData>({
+    title: '',
+    description: '',
+    types: [ActivityType.BOULDERING],
+    grades: [DifficultyGrade.V0_V2],
+    slotMax: 4,
+    meetMode: MeetMode.MEET_AT_ENTRANCE,
+    costMode: CostMode.AA,
+    cost: 0,
+    isPrivate: false,
+    selectedGym: null
+  });
   
-  const [currentGradeOptions, setCurrentGradeOptions] = useState<Array<{ label: string; value: string }>>([]);
-  const [activityDateString, setActivityDateString] = useState<string>('');
-  const [startTimeString, setStartTimeString] = useState<string>('');
-  const [endTimeString, setEndTimeString] = useState<string>('');
-
-  const [showMapPicker, setShowMapPicker] = useState(false);
-  const [mapCenter, setMapCenter] = useState<L.LatLngExpression>([39.9042, 116.4074]); 
-  const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);
-  const [isGeolocating, setIsGeolocating] = useState(false);
-  const [poiSearchTerm, setPoiSearchTerm] = useState('');
-  const [poiResults, setPoiResults] = useState<typeof VENUES>([]);
-
-  // Helper to update form values
-  const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type } = e.target;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    if (type === 'checkbox') {
-      setFormValues(prev => ({ ...prev, [name]: (e.target as HTMLInputElement).checked }));
-    } else if (type === 'select-multiple') {
-      const selectedOptions = Array.from((e.target as HTMLSelectElement).selectedOptions).map(option => option.value);
-      setFormValues(prev => ({ ...prev, [name]: selectedOptions }));
-    } else if (name === 'slotMax') {
-      setFormValues(prev => ({ ...prev, [name]: parseInt(value, 10) || 1 }));
-    } else {
-      setFormValues(prev => ({ ...prev, [name]: value }));
-    }
-  };
-  
-  const setSpecificFormValue = (name: keyof typeof initialFormValues, value: string | number | boolean | string[]) => {
-    setFormValues(prev => ({ ...prev, [name]: value }));
-  };
-
-  useEffect(() => {
-    const newGradeOptions: Array<{ label: string; value: string }> = [];
-    let hasVScale = false;
-    let hasYDS = false;
-
-    (formValues.types as ActivityType[]).forEach(type => {
-      const details = activityTypeDetails[type];
-      if (details) {
-        if (details.gradeSystem === 'VScale') hasVScale = true;
-        if (details.gradeSystem === 'YDS') hasYDS = true;
-        if (details.gradeSystem === 'Both') {
-          hasVScale = true;
-          hasYDS = true;
-        }
-      }
-    });
-
-    if (hasVScale) V_SCALE_GRADES.forEach(g => !newGradeOptions.find(opt => opt.value === g.value) && newGradeOptions.push(g));
-    if (hasYDS) YDS_GRADES.forEach(g => !newGradeOptions.find(opt => opt.value === g.value) && newGradeOptions.push(g));
-    
-    setCurrentGradeOptions(newGradeOptions.sort((a, b) => a.label.localeCompare(b.label)));
-    
-    const currentSelectedGrades = formValues.grades || [];
-    const validSelectedGrades = currentSelectedGrades.filter((g: string) => newGradeOptions.some(opt => opt.value === g));
-    if (JSON.stringify(currentSelectedGrades) !== JSON.stringify(validSelectedGrades)) {
-      setSpecificFormValue('grades', validSelectedGrades);
-    }
-  }, [formValues.types, formValues.grades]);
-
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
     if (!user) {
-      showError('请先登录');
-      setLoading(false);
-      return;
-    }
-    if (!formValues.types || formValues.types.length === 0) {
-      showError('请选择至少一种活动类型');
-      setLoading(false);
+      toast.error('Please login to create an activity');
       return;
     }
     
-    // Validate date and time strings
-    if (!activityDateString || !startTimeString || !endTimeString) {
-      showError('请选择完整的活动日期和时间范围');
-      setLoading(false);
+    if (!formValues.selectedGym) {
+      toast.error('Please select a climbing gym');
       return;
     }
-
-    if (startTimeString >= endTimeString) {
-      showError('开始时间必须早于结束时间');
-      setLoading(false);
-      return;
-    }
-
-    const hostId = user.openid;
-    const startDateTime = dayjs(activityDateString).hour(dayjs(startTimeString).hour()).minute(dayjs(startTimeString).minute()).second(0).toDate();
-
-    const activityDataForStore: Omit<Activity, 'id' | 'createdAt' | 'updatedAt' | 'host' | 'participants' | 'comments' | 'reviews' | 'datetime'> & { host?: User; description?: string; } = {
-      title: formValues.title || '',
-      locationText: formValues.locationText || '', 
-      hostId,
-      host: user,
-      types: formValues.types || [],
-      grades: formValues.grades || [],
-      participantIds: [hostId],
-      status: ActivityStatus.OPEN,
-      participantCount: 1,
-      lat: Number(formValues.lat) || 0,
-      lng: Number(formValues.lng) || 0,
-      isPrivate: formValues.isPrivate || false,
-      meetMode: formValues.meetMode || MeetMode.MEET_AT_ENTRANCE,
-      costMode: formValues.costMode || CostMode.AA,
-      slotMax: formValues.slotMax || 2,
-      description: formValues.description || '',
-    };
     
-    const newActivityWithId: Activity = {
-      ...(activityDataForStore as Omit<Activity, 'id' | 'createdAt' | 'updatedAt' | 'datetime'>), 
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      participants: [], 
-      comments: [],
-      reviews: [],
-      datetime: startDateTime, 
-    };
-
     try {
-      await storeAddActivity(newActivityWithId);
-      showSuccess('活动发布成功！');
-      navigate(-1); // Go back to previous page
+      const activityData = {
+        title: formValues.title,
+        description: formValues.description,
+        types: formValues.types,
+        grades: formValues.grades,
+        slotMax: formValues.slotMax,
+        meetMode: formValues.meetMode,
+        costMode: formValues.costMode,
+        cost: formValues.costMode === CostMode.HOST_TREAT ? formValues.cost : 0,
+        isPrivate: formValues.isPrivate,
+        gymId: formValues.selectedGym.id,
+        organizerId: user.openid,
+        // Add required fields for Activity type
+        id: Date.now().toString(),
+        startTime: new Date(),
+        endTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours later
+        status: 'OPEN' as any,
+        participants: [],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      // For now, just add to local store until API is ready
+      setActivities([...activities, activityData as any]);
+      toast.success('Activity created successfully!');
+      navigate('/activities');
     } catch (error) {
-      showError('发布活动时遇到错误，请重试');
-    } finally {
-      setLoading(false);
+      toast.error('Failed to create activity. Please try again.');
     }
-  };
-
-  const handleActivityTypeCheckboxChange = (typeValue: ActivityType, checked: boolean) => {
-    const updatedTypes = checked 
-      ? [...(formValues.types as ActivityType[]), typeValue]
-      : (formValues.types as ActivityType[]).filter(t => t !== typeValue);
-    setSpecificFormValue('types', updatedTypes);
-  };
-
-  const LocationPickerMap: React.FC<{ initialCenter: L.LatLngExpression, currentMarkerPos: L.LatLng | null, onLocationSelect: (latlng: L.LatLng) => void }> = 
-    ({ initialCenter, currentMarkerPos, onLocationSelect }) => {
-    const [mapRef, setMapRef] = useState<L.Map | null>(null);
-
-    const MapEvents = () => {
-      const mapEvents = useMapEvents({
-        click(e: L.LeafletMouseEvent) { 
-          onLocationSelect(e.latlng);
-        },
-        load() { 
-          // Map loaded
-        }
-      });
-      
-      useEffect(() => {
-        setMapRef(mapEvents);
-      }, [mapEvents]);
-      
-      return null;
-    };
-
-    useEffect(() => {
-      if (mapRef && initialCenter) {
-        mapRef.setView(initialCenter as L.LatLngTuple, 13);
-      }
-    }, [mapRef, initialCenter]);
-
-    return (
-      <MapContainer
-        center={initialCenter as L.LatLngTuple}
-        zoom={13}
-        style={{ height: '300px', width: '100%' }}
-        className="rounded-lg overflow-hidden shadow-lg"
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        {currentMarkerPos && <Marker position={currentMarkerPos} />}
-        <MapEvents />
-      </MapContainer>
-    );
-  };
-
-  const openMapPicker = () => {
-    if (formValues.lat && formValues.lng) {
-      setMapCenter([formValues.lat, formValues.lng]);
-      setMarkerPosition(new L.LatLng(formValues.lat, formValues.lng));
-    }
-    setShowMapPicker(true);
-  };
-
-  const handleMapLocationConfirm = () => {
-    if (markerPosition) {
-      setSpecificFormValue('lat', markerPosition.lat);
-      setSpecificFormValue('lng', markerPosition.lng);
-      if (!formValues.locationText) {
-        setSpecificFormValue('locationText', `纬度: ${markerPosition.lat.toFixed(6)}, 经度: ${markerPosition.lng.toFixed(6)}`);
-      }
-    }
-    setShowMapPicker(false);
-  };
-
-  const handleUseCurrentUserLocation = () => {
-    if (!navigator.geolocation) {
-      showError('您的浏览器不支持地理定位');
-      return;
-    }
-
-    setIsGeolocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        const newPos = new L.LatLng(lat, lng);
-        setMarkerPosition(newPos);
-        setMapCenter([lat, lng]);
-        setIsGeolocating(false);
-        showSuccess('已获取当前位置');
-      },
-      (error) => {
-        setIsGeolocating(false);
-        showError('无法获取当前位置，请检查位置权限设置');
-        console.error('Geolocation error:', error);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-    );
-  };
-
-  const handlePoiSearch = (term: string) => {
-    setPoiSearchTerm(term);
-    if (term.trim() === '') {
-      setPoiResults([]);
-      return;
-    }
-    const filteredVenues = VENUES.filter(venue => 
-      venue.label.toLowerCase().includes(term.toLowerCase())
-    );
-    setPoiResults(filteredVenues);
-  };
-
-  const handlePoiResultClick = (venue: typeof VENUES[0]) => {
-    const newPos = new L.LatLng(venue.lat, venue.lng);
-    setMarkerPosition(newPos);
-    setMapCenter([venue.lat, venue.lng]);
-    setPoiSearchTerm(venue.label);
-    setPoiResults([]);
-  };
-
-  const handleClose = () => {
-    navigate(-1); // Go back to previous page
   };
 
   return (
@@ -406,7 +177,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
         <div className="header-content">
           <button
             type="button"
-            onClick={handleClose}
+            onClick={() => navigate(-1)}
             className="close-button"
             aria-label="返回"
           >
@@ -425,7 +196,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
         </div>
       </div>
 
-      <form onSubmit={onSubmit} className="create-activity-form">
+      <form onSubmit={handleSubmit} className="create-activity-form">
         {/* Basic Info Section */}
         <div className="form-section">
           <div className="section-header">
@@ -447,7 +218,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
               id="title"
               name="title"
               value={formValues.title}
-              onChange={handleFormChange}
+              onChange={(e) => setFormValues(prev => ({ ...prev, title: e.target.value }))}
               className="form-input"
               placeholder="例如：周末欢乐抱石局 🧗‍♀️"
               maxLength={50}
@@ -463,7 +234,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
               id="description"
               name="description"
               value={formValues.description}
-              onChange={handleFormChange}
+              onChange={(e) => setFormValues(prev => ({ ...prev, description: e.target.value }))}
               className="form-textarea"
               placeholder="分享更多详情：路线风格、集合点、注意事项等..."
               rows={3}
@@ -472,39 +243,26 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
           </div>
         </div>
 
-        {/* Location Section */}
+        {/* Climbing Gym Selection Section */}
         <div className="form-section">
           <div className="section-header">
             <div className="section-icon">
               <LocationIcon />
             </div>
             <div>
-              <h3 className="section-title">活动地点</h3>
-              <p className="section-description">在哪里攀岩？</p>
+              <h3 className="section-title">选择岩馆</h3>
+              <p className="section-description">从官方岩馆列表中选择</p>
             </div>
           </div>
           
-          <div className="location-input-group">
-            <div className="form-group">
-              <input
-                type="text"
-                id="locationText"
-                name="locationText"
-                value={formValues.locationText}
-                onChange={handleFormChange}
-                className="form-input location-input"
-                placeholder="输入地点名称或地址"
-                required
-              />
-            </div>
-            <button 
-              type="button" 
-              onClick={openMapPicker} 
-              className="map-picker-button"
-            >
-              <MapIcon />
-              <span>地图选择</span>
-            </button>
+          <div className="form-group">
+            <ClimbingGymSelector
+              selectedGymId={formValues.selectedGym?.id}
+              onGymSelect={(gym) => setFormValues(prev => ({ ...prev, selectedGym: gym }))}
+              required
+              placeholder="请选择攀岩馆"
+              className="w-full"
+            />
           </div>
         </div>
         
@@ -532,7 +290,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
                     name="types" 
                     value={opt.value}
                     checked={(formValues.types as ActivityType[]).includes(opt.value as ActivityType)}
-                    onChange={(e) => handleActivityTypeCheckboxChange(opt.value as ActivityType, e.target.checked)}
+                    onChange={(e) => setFormValues(prev => ({ ...prev, types: [...(prev.types as ActivityType[]), e.target.value as ActivityType] } as ActivityFormData) as ActivityFormData)}
                     className="activity-type-checkbox"
                   />
                   <div className="activity-type-content">
@@ -544,7 +302,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
             </div>
           </div>
           
-          {(formValues.types as ActivityType[]).length > 0 && currentGradeOptions.length > 0 && (
+          {(formValues.types as ActivityType[]).length > 0 && (
             <div className="form-group">
               <label htmlFor="grades" className="form-label">
                 难度范围 <small className="text-gray-500">(可多选)</small>
@@ -553,13 +311,13 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
                 id="grades"
                 name="grades"
                 value={formValues.grades as string[]}
-                onChange={handleFormChange}
+                onChange={(e) => setFormValues(prev => ({ ...prev, grades: [...(prev.grades as string[]), e.target.value] } as ActivityFormData) as ActivityFormData)}
                 multiple
                 className="form-select grade-select"
-                size={Math.min(currentGradeOptions.length, 5)}
+                size={Math.min((formValues.types as ActivityType[]).length, 5)}
               >
-                {currentGradeOptions.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                {VENUES.map(venue => (
+                  <option key={venue.value} value={venue.value}>{venue.label}</option>
                 ))}
               </select>
             </div>
@@ -580,59 +338,6 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
           
           <div className="datetime-grid">
             <div className="form-group">
-              <label htmlFor="activityDateString" className="form-label">日期 <span className="required">*</span></label>
-              <input
-                type="date"
-                id="activityDateString"
-                name="activityDateString"
-                value={activityDateString}
-                onChange={(e) => setActivityDateString(e.target.value)}
-                className="form-input"
-                min={dayjs().format('YYYY-MM-DD')}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="startTimeString" className="form-label">开始时间 <span className="required">*</span></label>
-              <input
-                type="time"
-                id="startTimeString"
-                name="startTimeString"
-                value={startTimeString}
-                onChange={(e) => setStartTimeString(e.target.value)}
-                className="form-input"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="endTimeString" className="form-label">结束时间 <span className="required">*</span></label>
-              <input
-                type="time"
-                id="endTimeString"
-                name="endTimeString"
-                value={endTimeString}
-                onChange={(e) => setEndTimeString(e.target.value)}
-                className="form-input"
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Settings Section */}
-        <div className="form-section">
-          <div className="section-header">
-            <div className="section-icon">
-              <SettingsIcon />
-            </div>
-            <div>
-              <h3 className="section-title">活动设置</h3>
-              <p className="section-description">配置活动的具体安排</p>
-            </div>
-          </div>
-          
-          <div className="settings-grid">
-            <div className="form-group">
               <label htmlFor="slotMax" className="form-label">人数上限</label>
               <div className="number-input-wrapper">
                 <UsersIcon />
@@ -641,7 +346,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
                   id="slotMax"
                   name="slotMax"
                   value={formValues.slotMax}
-                  onChange={handleFormChange}
+                  onChange={(e) => setFormValues(prev => ({ ...prev, slotMax: parseInt(e.target.value, 10) || 1 } as ActivityFormData) as ActivityFormData)}
                   className="form-input number-input"
                   min="1"
                   max="50"
@@ -657,7 +362,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
                 id="meetMode"
                 name="meetMode"
                 value={formValues.meetMode}
-                onChange={handleFormChange}
+                onChange={(e) => setFormValues(prev => ({ ...prev, meetMode: e.target.value as MeetMode } as ActivityFormData) as ActivityFormData)}
                 className="form-select"
                 required
               >
@@ -675,7 +380,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
                 id="costMode"
                 name="costMode"
                 value={formValues.costMode}
-                onChange={handleFormChange}
+                onChange={(e) => setFormValues(prev => ({ ...prev, costMode: e.target.value as CostMode } as ActivityFormData) as ActivityFormData)}
                 className="form-select"
                 required
               >
@@ -695,7 +400,7 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
                 id="isPrivate" 
                 name="isPrivate" 
                 checked={formValues.isPrivate} 
-                onChange={handleFormChange} 
+                onChange={(e) => setFormValues(prev => ({ ...prev, isPrivate: e.target.checked } as ActivityFormData) as ActivityFormData)}
                 className="form-checkbox" 
               />
               <span className="checkbox-text">
@@ -710,108 +415,14 @@ const CreateActivity: React.FC<CreateActivityProps> = () => {
           <button 
             type="submit" 
             className="submit-button"
-            disabled={loading}
           >
-            {loading ? (
-              <div className="loading-content">
-                <div className="loading-spinner"></div>
-                <span>发布中...</span>
-              </div>
-            ) : (
-              <div className="submit-content">
-                <SparklesIcon />
-                <span>发布活动</span>
-              </div>
-            )}
+            <div className="submit-content">
+              <SparklesIcon />
+              <span>发布活动</span>
+            </div>
           </button>
         </div>
       </form>
-
-      {/* Enhanced Map Picker Modal */}
-      {showMapPicker && (
-        <div className="map-modal-overlay">
-          <div className="map-modal">
-            <div className="map-modal-header">
-              <h3 className="map-modal-title">选择活动地点</h3>
-              <button
-                type="button"
-                onClick={() => setShowMapPicker(false)}
-                className="map-modal-close"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-            
-            <div className="map-modal-content">
-              <div className="map-search-section">
-                <div className="search-input-group">
-                  <input 
-                    type="text" 
-                    value={poiSearchTerm} 
-                    onChange={(e) => handlePoiSearch(e.target.value)}
-                    placeholder="搜索岩馆或地点名称..."
-                    className="search-input"
-                  />
-                  <button 
-                    type="button" 
-                    onClick={handleUseCurrentUserLocation} 
-                    className="location-button"
-                    disabled={isGeolocating}
-                  >
-                    {isGeolocating ? (
-                      <div className="loading-spinner small"></div>
-                    ) : (
-                      <LocationIcon />
-                    )}
-                    <span>{isGeolocating ? '定位中...' : '当前位置'}</span>
-                  </button>
-                </div>
-                
-                {poiResults.length > 0 && (
-                  <div className="search-results">
-                    {poiResults.map(venue => (
-                      <button
-                        key={venue.value} 
-                        onClick={() => handlePoiResultClick(venue)}
-                        className="search-result-item"
-                      >
-                        <LocationIcon />
-                        <span>{venue.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              <div className="map-container">
-                <LocationPickerMap
-                  initialCenter={mapCenter}
-                  currentMarkerPos={markerPosition}
-                  onLocationSelect={setMarkerPosition}
-                />
-              </div>
-              
-              <div className="map-modal-footer">
-                <button
-                  type="button"
-                  onClick={() => setShowMapPicker(false)}
-                  className="map-button-secondary"
-                >
-                  取消
-                </button>
-                <button
-                  type="button"
-                  onClick={handleMapLocationConfirm}
-                  className="map-button-primary"
-                  disabled={!markerPosition}
-                >
-                  确认位置
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

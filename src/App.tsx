@@ -2,6 +2,8 @@ import React, { Suspense, useEffect, useState, useMemo, useCallback } from 'reac
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useUserSelector } from './store/useOptimizedStore';
 import NotificationContainer from './components/NotificationContainer/NotificationContainer';
+import StatusBar from './components/StatusBar/StatusBar';
+import ConnectionManager from './components/ConnectionManager/ConnectionManager';
 import { ErrorBoundary } from './components';
 import { ToastProvider } from './components/Toast/ToastProvider';
 
@@ -257,6 +259,8 @@ const App: React.FC = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
+        <ConnectionManager />
+        <StatusBar />
         <NotificationContainer />
       </ErrorBoundary>
     </ToastProvider>

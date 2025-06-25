@@ -17,6 +17,7 @@ export interface User {
   notificationPreferences?: UserNotificationPreferences;
   isBanned?: boolean;
   role?: 'admin' | 'user';
+  token?: string;
 }
 
 // Activity related types
@@ -95,6 +96,21 @@ export interface Announcement {
   endAt: Date;
   weight: number;
   createdAt: Date;
+}
+
+// Climbing Gym related types
+export interface ClimbingGym {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  description?: string;
+  facilities?: string[];
+  priceRange?: string;
+  operatingHours?: string;
+  contact?: string;
+  website?: string;
 }
 
 // Enums

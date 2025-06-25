@@ -1,27 +1,48 @@
 import React, { useState, FormEvent, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUserActions } from '../../store/useOptimizedStore';
+import { useAuth } from '../../hooks/useAuth';
 import { showSuccess, showError } from '../../utils/notifications';
-import { VALIDATION_RULES, SUCCESS_MESSAGES, ERROR_MESSAGES } from '../../utils/constants';
-import { mockUsers } from '../../data/mockData';
+import { VALIDATION_RULES } from '../../utils/constants';
 import { colors, shadows } from '../../utils/designSystem';
-import type { User } from '../../types';
 import './Login.css';
 
 /**
- * Optimized Login Component with Climbing-Inspired Design
+ * Updated Login Component with Real API Integration
  * - Modern gradient-based design system
  * - Climbing-themed branding and colors
- * - Enhanced visual hierarchy and animations
+ * - Real authentication instead of mock
  */
 
 const Login: React.FC = () => {
-  const navigate = useNavigate();
-  const { setUser } = useUserActions();
+
+  const { login, register, isLoading } = useAuth();
   
-  const [loading, setLoading] = useState(false);
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  const validatePhone = useCallback((value: string): string | null => {
+    const phoneRegex = /^1[3-9]\d{9}$/;
+    if (!value.trim()) {
+      return '请输入手机号';
+    }
+    if (!phoneRegex.test(value.trim())) {
+      return '请输入有效的手机号';
+    }
+    return null;
+  }, []);
+
+  const validatePassword = useCallback((value: string): string | null => {
+    if (!value) {
+      return '请输入密码';
+    }
+    if (value.length < 6) {
+      return '密码至少6位';
+    }
+    return null;
+  }, []);
 
   const validateNickname = useCallback((value: string): string | null => {
     const trimmed = value.trim();
@@ -41,19 +62,54 @@ const Login: React.FC = () => {
     return null;
   }, []);
 
-  const handleNicknameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setNickname(value);
+  const validateVerificationCode = useCallback((value: string): string | null => {
+    if (!value.trim()) {
+      return '请输入验证码';
+    }
+    if (value.trim().length !== 6) {
+      return '验证码为6位数字';
+    }
+    return null;
+  }, []);
+
+  const handleInputChange = useCallback((field: string, value: string) => {
+    switch (field) {
+      case 'phone':
+        setPhone(value);
+        break;
+      case 'password':
+        setPassword(value);
+        break;
+      case 'nickname':
+        setNickname(value);
+        break;
+      case 'verificationCode':
+        setVerificationCode(value);
+        break;
+    }
     
     if (error) {
       setError(null);
     }
   }, [error]);
 
-  const handleLogin = useCallback(async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const validationError = validateNickname(nickname);
+    // Validation
+    let validationError = null;
+    
+    if (!isRegisterMode) {
+      // Login validation
+      validationError = validatePhone(phone) || validatePassword(password);
+    } else {
+      // Registration validation
+      validationError = validatePhone(phone) || 
+                       validatePassword(password) || 
+                       validateNickname(nickname) || 
+                       validateVerificationCode(verificationCode);
+    }
+
     if (validationError) {
       setError(validationError);
       showError(validationError);
@@ -61,36 +117,52 @@ const Login: React.FC = () => {
     }
 
     setError(null);
-    setLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      const mockUser: User = {
-        openid: `mock_${Date.now()}`,
-        nickname: nickname.trim(),
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${nickname.trim().replace(/\s/g, '_')}`,
-        level: Math.floor(Math.random() * 5) + 1,
-        gearTags: [],
-        createdAt: new Date(),
-        role: 'user',
-        isBanned: false,
-        notificationPreferences: mockUsers[0].notificationPreferences,
-      };
-
-      setUser(mockUser);
-      showSuccess(SUCCESS_MESSAGES.LOGIN_SUCCESS);
-      
-      setTimeout(() => navigate('/', { replace: true }), 500);
-      
+      if (isRegisterMode) {
+        // Register
+        const success = await register(phone, password, nickname, verificationCode);
+        if (success) {
+          showSuccess('注册成功！');
+        }
+      } else {
+        // Login
+        const success = await login(phone, password);
+        if (success) {
+          showSuccess('登录成功！');
+        }
+      }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.SERVER_ERROR;
-      setError(errorMessage);
-      showError(errorMessage);
-    } finally {
-      setLoading(false);
+      console.error('Auth error:', error);
+      // Error handling is done in the useAuth hook
     }
-  }, [nickname, validateNickname, setUser, navigate]);
+  }, [phone, password, nickname, verificationCode, isRegisterMode, login, register, validatePhone, validatePassword, validateNickname, validateVerificationCode]);
+
+  const toggleMode = useCallback(() => {
+    setIsRegisterMode(!isRegisterMode);
+    setError(null);
+    // Clear form when switching modes
+    setPhone('');
+    setPassword('');
+    setNickname('');
+    setVerificationCode('');
+  }, [isRegisterMode]);
+
+  const sendVerificationCode = useCallback(async () => {
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      setError(phoneError);
+      showError(phoneError);
+      return;
+    }
+
+    try {
+      // TODO: Implement verification code sending
+      showSuccess('验证码已发送到您的手机');
+    } catch (error) {
+      showError('发送验证码失败，请重试');
+    }
+  }, [phone, validatePhone]);
 
   return (
     <div 
@@ -134,101 +206,182 @@ const Login: React.FC = () => {
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6" noValidate>
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          {/* Phone Input */}
           <div>
             <label 
-              htmlFor="nickname" 
+              htmlFor="phone" 
               className="block text-sm font-semibold mb-2"
               style={{ color: colors.neutral[700] }}
             >
-              攀岩昵称
+              手机号
             </label>
             <input 
-              type="text"
-              id="nickname"
-              name="nickname"
-              placeholder="输入你的攀岩昵称..."
-              disabled={loading}
-              value={nickname}
-              onChange={handleNicknameChange}
-              aria-invalid={!!error}
-              aria-describedby={error ? "nickname-error" : undefined}
-              maxLength={VALIDATION_RULES.NICKNAME.MAX_LENGTH}
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="请输入手机号"
+              disabled={isLoading}
+              value={phone}
+              onChange={(e) => handleInputChange('phone', e.target.value)}
               className="w-full px-4 py-4 text-lg font-medium rounded-2xl transition-all duration-300 ease-smooth focus:outline-none focus:ring-4 placeholder-neutral-400"
               style={{
                 background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
-                border: error 
-                  ? `2px solid ${colors.error.primary}` 
-                  : `2px solid ${colors.neutral[200]}`,
+                border: error ? `2px solid ${colors.error.primary}` : `2px solid ${colors.neutral[200]}`,
                 backdropFilter: 'blur(10px)',
                 boxShadow: shadows.soft,
               }}
-              onFocus={(e) => {
-                e.target.style.borderColor = error ? colors.error.primary : colors.primary[400];
-                e.target.style.boxShadow = error 
-                  ? `0 0 0 4px ${colors.error.subtle}` 
-                  : `0 0 0 4px ${colors.primary[100]}`;
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = error ? colors.error.primary : colors.neutral[200];
-                e.target.style.boxShadow = shadows.soft;
+            />
+          </div>
+
+          {/* Password Input */}
+          <div>
+            <label 
+              htmlFor="password" 
+              className="block text-sm font-semibold mb-2"
+              style={{ color: colors.neutral[700] }}
+            >
+              密码
+            </label>
+            <input 
+              type="password"
+              id="password"
+              name="password"
+              placeholder="请输入密码"
+              disabled={isLoading}
+              value={password}
+              onChange={(e) => handleInputChange('password', e.target.value)}
+              className="w-full px-4 py-4 text-lg font-medium rounded-2xl transition-all duration-300 ease-smooth focus:outline-none focus:ring-4 placeholder-neutral-400"
+              style={{
+                background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
+                border: error ? `2px solid ${colors.error.primary}` : `2px solid ${colors.neutral[200]}`,
+                backdropFilter: 'blur(10px)',
+                boxShadow: shadows.soft,
               }}
             />
-            {error && (
-              <p 
-                id="nickname-error" 
-                className="text-sm font-medium mt-2 flex items-center gap-2" 
-                style={{ color: colors.error.primary }}
-                role="alert"
-              >
-                <span>⚠️</span>
-                {error}
-              </p>
-            )}
           </div>
+
+          {/* Registration-specific fields */}
+          {isRegisterMode && (
+            <>
+              {/* Nickname Input */}
+              <div>
+                <label 
+                  htmlFor="nickname" 
+                  className="block text-sm font-semibold mb-2"
+                  style={{ color: colors.neutral[700] }}
+                >
+                  攀岩昵称
+                </label>
+                <input 
+                  type="text"
+                  id="nickname"
+                  name="nickname"
+                  placeholder="输入你的攀岩昵称"
+                  disabled={isLoading}
+                  value={nickname}
+                  onChange={(e) => handleInputChange('nickname', e.target.value)}
+                  maxLength={VALIDATION_RULES.NICKNAME.MAX_LENGTH}
+                  className="w-full px-4 py-4 text-lg font-medium rounded-2xl transition-all duration-300 ease-smooth focus:outline-none focus:ring-4 placeholder-neutral-400"
+                  style={{
+                    background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
+                    border: error ? `2px solid ${colors.error.primary}` : `2px solid ${colors.neutral[200]}`,
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: shadows.soft,
+                  }}
+                />
+              </div>
+
+              {/* Verification Code Input */}
+              <div>
+                <label 
+                  htmlFor="verificationCode" 
+                  className="block text-sm font-semibold mb-2"
+                  style={{ color: colors.neutral[700] }}
+                >
+                  验证码
+                </label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text"
+                    id="verificationCode"
+                    name="verificationCode"
+                    placeholder="6位验证码"
+                    disabled={isLoading}
+                    value={verificationCode}
+                    onChange={(e) => handleInputChange('verificationCode', e.target.value)}
+                    maxLength={6}
+                    className="flex-1 px-4 py-4 text-lg font-medium rounded-2xl transition-all duration-300 ease-smooth focus:outline-none focus:ring-4 placeholder-neutral-400"
+                    style={{
+                      background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)`,
+                      border: error ? `2px solid ${colors.error.primary}` : `2px solid ${colors.neutral[200]}`,
+                      backdropFilter: 'blur(10px)',
+                      boxShadow: shadows.soft,
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={sendVerificationCode}
+                    disabled={isLoading || !phone}
+                    className="px-4 py-2 text-sm font-bold text-white rounded-xl transition-all duration-300"
+                    style={{
+                      background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
+                      boxShadow: shadows.soft,
+                    }}
+                  >
+                    发送验证码
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+
+          {error && (
+            <p 
+              className="text-sm font-medium flex items-center gap-2" 
+              style={{ color: colors.error.primary }}
+              role="alert"
+            >
+              <span>⚠️</span>
+              {error}
+            </p>
+          )}
           
           <button 
             type="submit" 
-            disabled={loading || !nickname.trim()}
+            disabled={isLoading || !phone.trim() || !password.trim()}
             className="w-full py-4 px-6 text-lg font-bold text-white rounded-2xl transition-all duration-300 ease-smooth hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4"
             style={{
-              background: loading || !nickname.trim()
+              background: isLoading || !phone.trim() || !password.trim()
                 ? `linear-gradient(135deg, ${colors.neutral[400]} 0%, ${colors.neutral[500]} 100%)`
                 : `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.secondary[600]} 100%)`,
-              boxShadow: loading || !nickname.trim() ? shadows.soft : shadows.medium,
+              boxShadow: isLoading || !phone.trim() || !password.trim() ? shadows.soft : shadows.medium,
             }}
           >
-            {loading ? (
-              <span className="flex items-center justify-center gap-3">
-                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                正在攀登中...
-              </span>
+            {isLoading ? (
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>{isRegisterMode ? '注册中...' : '登录中...'}</span>
+              </div>
             ) : (
               <span className="flex items-center justify-center gap-2">
-                🚀 开始攀岩之旅
+                <span>{isRegisterMode ? '🎯 注册' : '🚀 登录'}</span>
               </span>
             )}
           </button>
-        </form>
 
-        <div 
-          className="text-center mt-8 p-4 rounded-2xl backdrop-blur-sm"
-          style={{
-            background: `linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.4) 100%)`,
-            border: `1px solid rgba(255, 255, 255, 0.3)`,
-          }}
-        >
-          <p className="text-sm font-medium mb-2" style={{ color: colors.neutral[600] }}>
-            💡 体验提示
-          </p>
-          <p className="text-xs" style={{ color: colors.neutral[500] }}>
-            真实版本将使用微信授权登录<br />
-            现在只需输入昵称即可体验所有功能
-          </p>
-        </div>
+          {/* Toggle between login and register */}
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={toggleMode}
+              className="text-sm font-medium underline transition-colors duration-300"
+              style={{ color: colors.primary[600] }}
+            >
+              {isRegisterMode ? '已有账号？点击登录' : '没有账号？点击注册'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

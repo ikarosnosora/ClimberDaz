@@ -8,7 +8,7 @@ interface ButtonProps {
   /** Button content */
   children: React.ReactNode;
   /** Click handler */
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
   /** Visual variant of the button */
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   /** Size variant */

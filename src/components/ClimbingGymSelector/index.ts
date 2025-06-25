@@ -1,0 +1,1 @@
+export { ClimbingGymSelector, default } from './ClimbingGymSelector'; 

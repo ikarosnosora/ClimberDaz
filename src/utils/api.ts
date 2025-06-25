@@ -1,14 +1,19 @@
 import { useState, useCallback } from 'react';
-import { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import { ERROR_MESSAGES } from './constants';
 import { showError, showSuccess } from './notifications';
 import type { ApiResponse, ApiError } from '../types/common';
+import config from '../services/api/config';
 
 /**
  * Unified API Utilities
  * Consolidates functionality from apiUtils.ts, apiRequest.ts, and apiErrorHandler.ts
  * Provides consistent error handling and response processing
  */
+
+// Configure axios defaults
+axios.defaults.baseURL = config.baseUrl;
+axios.defaults.timeout = 10000;
 
 // Types
 export interface PaginationData {
@@ -46,11 +51,55 @@ export interface ApiResponseWithHeaders<T = unknown> extends ApiResponse<T> {
   headers?: Record<string, string>;
 }
 
+// Token management
+export const TokenManager = {
+  getToken: () => localStorage.getItem('climberdaz_token'),
+  setToken: (token: string) => localStorage.setItem('climberdaz_token', token),
+  removeToken: () => localStorage.removeItem('climberdaz_token'),
+  isTokenValid: () => {
+    const token = TokenManager.getToken();
+    if (!token) return false;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
+  }
+};
+
 // API Configuration
-const getAuthHeaders = (token?: string): Record<string, string> => ({
-  'Content-Type': 'application/json',
-  ...(token && { Authorization: `Bearer ${token}` }),
-});
+const getAuthHeaders = (token?: string): Record<string, string> => {
+  const authToken = token || TokenManager.getToken();
+  return {
+    'Content-Type': 'application/json',
+    ...(authToken && { Authorization: `Bearer ${authToken}` }),
+  };
+};
+
+// Axios interceptors for automatic token management
+axios.interceptors.request.use(
+  (config) => {
+    const token = TokenManager.getToken();
+    if (token && TokenManager.isTokenValid()) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      TokenManager.removeToken();
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 const createQueryString = (params: Record<string, unknown>): string => {
   const searchParams = new URLSearchParams();
@@ -94,6 +143,14 @@ const createApiError = (error: unknown): ApiErrorClass => {
     return error;
   }
   
+  if (axios.isAxiosError(error)) {
+    const status = error.response?.status || 0;
+    const message = error.response?.data?.message || error.message || ERROR_MESSAGES.SERVER_ERROR;
+    const details = error.response?.data?.details || {};
+    
+    return new ApiErrorClass(message, status, details, error.config);
+  }
+  
   if (error instanceof Error) {
     return new ApiErrorClass(error.message || ERROR_MESSAGES.SERVER_ERROR, 0);
   }
@@ -128,6 +185,70 @@ const extractPaginationData = (headers: Record<string, string>): PaginationData 
   const totalPages = headers['x-total-pages'] ? parseInt(headers['x-total-pages'], 10) : 1;
 
   return total > 0 ? { total, page, limit, totalPages } : null;
+};
+
+// Core API request functions
+export const apiRequest = {
+  get: async <T>(url: string, params?: Record<string, unknown>, options?: AxiosRequestConfig): Promise<T> => {
+    try {
+      const fullUrl = createUrlWithParams(url, params);
+      const response: AxiosResponse<T> = await axios.get(fullUrl, {
+        ...options,
+        headers: { ...getAuthHeaders(), ...options?.headers }
+      });
+      return response.data;
+    } catch (error) {
+      throw createApiError(error);
+    }
+  },
+
+  post: async <T>(url: string, data?: unknown, options?: AxiosRequestConfig): Promise<T> => {
+    try {
+      const response: AxiosResponse<T> = await axios.post(url, data, {
+        ...options,
+        headers: { ...getAuthHeaders(), ...options?.headers }
+      });
+      return response.data;
+    } catch (error) {
+      throw createApiError(error);
+    }
+  },
+
+  put: async <T>(url: string, data?: unknown, options?: AxiosRequestConfig): Promise<T> => {
+    try {
+      const response: AxiosResponse<T> = await axios.put(url, data, {
+        ...options,
+        headers: { ...getAuthHeaders(), ...options?.headers }
+      });
+      return response.data;
+    } catch (error) {
+      throw createApiError(error);
+    }
+  },
+
+  patch: async <T>(url: string, data?: unknown, options?: AxiosRequestConfig): Promise<T> => {
+    try {
+      const response: AxiosResponse<T> = await axios.patch(url, data, {
+        ...options,
+        headers: { ...getAuthHeaders(), ...options?.headers }
+      });
+      return response.data;
+    } catch (error) {
+      throw createApiError(error);
+    }
+  },
+
+  delete: async <T>(url: string, options?: AxiosRequestConfig): Promise<T> => {
+    try {
+      const response: AxiosResponse<T> = await axios.delete(url, {
+        ...options,
+        headers: { ...getAuthHeaders(), ...options?.headers }
+      });
+      return response.data;
+    } catch (error) {
+      throw createApiError(error);
+    }
+  }
 };
 
 // Response processing with proper typing
@@ -203,7 +324,9 @@ export const useApiRequest = <T, Args extends unknown[]>(
         
         if (onError) {
           onError(apiError);
-        } else if (shouldShowError) {
+        }
+        
+        if (shouldShowError) {
           showError(getErrorMessage(apiError));
         }
         
@@ -223,20 +346,11 @@ export const useApiRequest = <T, Args extends unknown[]>(
 
   return {
     request,
+    reset,
     isLoading,
     data,
     error,
-    reset,
   };
 };
 
-// Utility Exports
-export {
-  getAuthHeaders,
-  createQueryString,
-  createUrlWithParams,
-  createApiError as handleApiError,
-  getErrorMessage,
-  extractPaginationData,
-  handleApiResponse,
-}; 
+export { createApiError, getErrorMessage, handleApiResponse, createUrlWithParams }; 

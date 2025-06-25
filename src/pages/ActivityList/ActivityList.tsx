@@ -93,7 +93,8 @@ const ActivityList: React.FC = () => {
   } = useActivitySelector();
   
   const { 
-    setActivityLoading: setStoreLoading,
+    fetchActivities,
+    refreshActivities,
   } = useActivityActions();
   
   const {
@@ -113,10 +114,20 @@ const ActivityList: React.FC = () => {
     isLoading: storeLoading,
   }), [allActivities.length, storeLoading]);
 
+  // Fetch activities on component mount
   useEffect(() => {
     console.log('[ActivityList Debug] Component mounted');
     console.log('[ActivityList Debug] debugInfo:', debugInfo);
-  }, [debugInfo]);
+    
+    // Only fetch if we don't have activities loaded yet
+    if (allActivities.length === 0 && !storeLoading) {
+      console.log('[ActivityList] Fetching activities from API...');
+      fetchActivities().catch((error) => {
+        console.error('[ActivityList] Failed to fetch activities:', error);
+        showError('获取活动列表失败，请检查网络连接');
+      });
+    }
+  }, [debugInfo, allActivities.length, storeLoading, fetchActivities]);
 
   // Local state
   const [displayedActivitiesCount, setDisplayedActivitiesCount] = useState(ITEMS_PER_PAGE);
@@ -218,15 +229,14 @@ const ActivityList: React.FC = () => {
     setIsLoadingMore(false);
   }, [isLoadingMore, paginationData.hasMore, filteredAndSortedActivities.length]);
 
-  // Enhanced refresh functionality with error handling
+  // Enhanced refresh functionality with real API call
   const handleRefresh = useCallback(async () => {
     if (isRefreshing) return;
     
     setIsRefreshing(true);
     try {
-      setStoreLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 800));
+      console.log('[ActivityList] Refreshing activities from API...');
+      await refreshActivities();
       setDisplayedActivitiesCount(ITEMS_PER_PAGE);
       setShowSearchResults(false);
       setRealTimeSearchResults([]);
@@ -235,10 +245,9 @@ const ActivityList: React.FC = () => {
       console.error('Refresh failed:', error);
       showError('刷新失败，请重试');
     } finally {
-      setStoreLoading(false);
       setIsRefreshing(false);
     }
-  }, [isRefreshing, setStoreLoading]);
+  }, [isRefreshing, refreshActivities]);
 
   // Memoized filter management
   const currentFilters = useMemo(() => ({

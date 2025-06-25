@@ -13,8 +13,8 @@ interface UserAvatarProps {
   avatar?: string;
   /** The user's nickname for fallback initials and alt text */
   nickname?: string;
-  /** The size of the avatar in pixels */
-  size?: number;
+  /** The size of the avatar in pixels or size preset */
+  size?: number | 'sm' | 'md' | 'lg' | 'xl';
   /** The user's level to display as a badge (optional) */
   level?: number;
   /** Additional CSS classes to apply to the avatar container */
@@ -56,6 +56,20 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   const avatarSrc = avatar || DEFAULT_AVATAR_SRC;
   const showFallback = !avatar && nickname;
   const initials = showFallback ? nickname![0].toUpperCase() : null;
+
+  // Convert size presets to numbers
+  const getSizeInPixels = (size: number | string): number => {
+    if (typeof size === 'number') return size;
+    const sizeMap = {
+      'sm': 32,
+      'md': 40,
+      'lg': 48,
+      'xl': 64,
+    };
+    return sizeMap[size as keyof typeof sizeMap] || 40;
+  };
+
+  const actualSize = getSizeInPixels(size);
 
   // Generate gradient based on user initials for consistent colors
   const getInitialsGradient = (initial: string) => {
@@ -104,11 +118,11 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   };
 
   const avatarSizeStyle = {
-    width: `${size}px`,
-    height: `${size}px`,
+    width: `${actualSize}px`,
+    height: `${actualSize}px`,
   };
 
-  const fontSize = Math.max(12, size * 0.4); // Responsive font size for initials
+  const fontSize = Math.max(12, actualSize * 0.4); // Responsive font size for initials
 
   return (
     <div 
@@ -170,8 +184,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
         <div 
           className="absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-white animate-pulse"
           style={{
-            width: `${Math.max(8, size * 0.2)}px`,
-            height: `${Math.max(8, size * 0.2)}px`,
+            width: `${Math.max(8, actualSize * 0.2)}px`,
+            height: `${Math.max(8, actualSize * 0.2)}px`,
             background: `linear-gradient(135deg, ${colors.success.primary} 0%, #22C55E 100%)`,
             boxShadow: shadows.soft,
           }}
@@ -183,9 +197,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
         <div 
           className="absolute -top-1 -right-1 flex items-center justify-center text-xs font-bold rounded-full transition-all duration-300 ease-smooth hover:scale-110 cursor-default"
           style={{
-            minWidth: `${Math.max(20, size * 0.4)}px`,
-            height: `${Math.max(20, size * 0.4)}px`,
-            fontSize: `${Math.max(10, size * 0.25)}px`,
+            minWidth: `${Math.max(20, actualSize * 0.4)}px`,
+            height: `${Math.max(20, actualSize * 0.4)}px`,
+            fontSize: `${Math.max(10, actualSize * 0.25)}px`,
             ...getLevelBadgeStyle(level),
             boxShadow: shadows.medium,
           }}
@@ -193,7 +207,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
         >
           <span className="flex items-center gap-0.5">
             {level >= 5 && (
-              <span className="text-yellow-300" style={{ fontSize: `${Math.max(8, size * 0.2)}px` }}>
+              <span className="text-yellow-300" style={{ fontSize: `${Math.max(8, actualSize * 0.2)}px` }}>
                 ⭐
               </span>
             )}

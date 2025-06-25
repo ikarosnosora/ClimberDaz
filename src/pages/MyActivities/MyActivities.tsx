@@ -2,7 +2,7 @@ import React, { useEffect, useState, SVGProps } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import ActivityCard from '../../components/ActivityCard/ActivityCard';
 import { Activity } from '../../types';
-import { useActivitySelector, useUserSelector } from '../../store/useOptimizedStore';
+import { useActivitySelector, useUserSelector, useActivityActions } from '../../store/useOptimizedStore';
 import { showWarning } from '../../utils/notifications';
 import { colors, shadows } from '../../utils/designSystem';
 
@@ -150,6 +150,7 @@ const MyActivities: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { user } = useUserSelector();
   const { activities: allActivities, isLoadingActivities: storeLoading } = useActivitySelector();
+  const { fetchActivities } = useActivityActions();
 
   const initialTab = searchParams.get('type') === 'joined' ? 'joined' : 'hosted';
   const [activeTab, setActiveTab] = useState<'hosted' | 'joined'>(initialTab);
@@ -158,6 +159,15 @@ const MyActivities: React.FC = () => {
 
   useEffect(() => {
     setIsLoading(true);
+    
+    // Fetch activities if not loaded yet
+    if (allActivities.length === 0 && !storeLoading) {
+      console.log('[MyActivities] Fetching activities from API...');
+      fetchActivities().catch((error: any) => {
+        console.error('[MyActivities] Failed to fetch activities:', error);
+      });
+    }
+    
     if (user && allActivities) {
       let relevantActivities: Activity[] = [];
       if (activeTab === 'hosted') {
@@ -168,7 +178,7 @@ const MyActivities: React.FC = () => {
       setFilteredActivities(relevantActivities.sort((a,b) => new Date(b.datetime).getTime() - new Date(a.datetime).getTime()));
     }
     setIsLoading(false); // Set loading to false after filtering
-  }, [activeTab, user, allActivities]);
+  }, [activeTab, user, allActivities, storeLoading, fetchActivities]);
   
   // Example: If activities were fetched from an API
   // useEffect(() => {

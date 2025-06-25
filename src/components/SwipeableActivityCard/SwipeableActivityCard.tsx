@@ -74,7 +74,7 @@ const SwipeableActivityCard: React.FC<SwipeableActivityCardProps> = ({
           if (onSwipeAction) {
             await onSwipeAction(activity, 'join');
           } else {
-            await joinActivity(activity.id, user.openid);
+            await joinActivity(activity.id);
             showSuccess('🎉 成功参加活动！');
           }
         } else if (swipeDistance < 0 && canLeave) {
@@ -82,7 +82,7 @@ const SwipeableActivityCard: React.FC<SwipeableActivityCardProps> = ({
           if (onSwipeAction) {
             await onSwipeAction(activity, 'leave');
           } else {
-            await leaveActivity(activity.id, user.openid);
+            await leaveActivity(activity.id);
             showSuccess('✅ 已退出活动');
           }
         }

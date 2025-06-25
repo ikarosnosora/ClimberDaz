@@ -1,0 +1,347 @@
+/* Status Bar Component Styles */
+.status-bar {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-all duration-300 ease-in-out;
+  max-width: 100%;
+}
+
+.status-bar.expanded {
+  @apply shadow-lg;
+}
+
+/* Minimal Status Bar */
+.status-bar-minimal {
+  @apply inline-flex items-center;
+}
+
+/* Main Status Display */
+.status-bar-main {
+  @apply flex items-center justify-between p-3 cursor-pointer hover:bg-gray-50 transition-colors duration-200;
+}
+
+.status-content {
+  @apply flex items-center flex-1 min-w-0;
+}
+
+.status-indicator {
+  @apply flex items-center justify-center w-8 h-8 rounded-full text-white mr-3 flex-shrink-0;
+  transition: all 0.3s ease;
+}
+
+.status-icon {
+  @apply text-sm;
+}
+
+.status-text {
+  @apply flex flex-col min-w-0 flex-1;
+}
+
+.status-label {
+  @apply text-sm font-medium text-gray-900 leading-tight;
+}
+
+.status-description {
+  @apply text-xs text-gray-600 leading-tight;
+}
+
+/* Sync Progress Spinner */
+.sync-progress {
+  @apply ml-3 flex-shrink-0;
+}
+
+.sync-spinner {
+  @apply w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin;
+}
+
+/* Pending Operations Badge */
+.pending-badge {
+  @apply ml-3 flex items-center justify-center w-6 h-6 bg-orange-500 text-white text-xs font-bold rounded-full flex-shrink-0;
+  min-width: 24px;
+}
+
+/* Expand Arrow */
+.expand-arrow {
+  @apply text-gray-400 transition-transform duration-200 flex-shrink-0 ml-2;
+}
+
+.expand-arrow.rotated {
+  @apply transform rotate-180;
+}
+
+/* Expanded Details */
+.status-bar-details {
+  @apply border-t border-gray-200 bg-gray-50 p-4 space-y-4;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Detail Sections */
+.detail-section {
+  @apply space-y-2;
+}
+
+.detail-title {
+  @apply text-sm font-semibold text-gray-900 mb-2;
+}
+
+.detail-grid {
+  @apply grid grid-cols-1 gap-2;
+}
+
+.detail-item {
+  @apply flex justify-between items-center;
+}
+
+.detail-label {
+  @apply text-sm text-gray-600;
+}
+
+.detail-value {
+  @apply text-sm font-medium text-gray-900;
+}
+
+/* Storage Info */
+.storage-info {
+  @apply space-y-2;
+}
+
+.storage-bar {
+  @apply w-full h-2 bg-gray-200 rounded-full overflow-hidden;
+}
+
+.storage-fill {
+  @apply h-full transition-all duration-500 ease-out;
+}
+
+.storage-text {
+  @apply flex justify-between items-center text-xs text-gray-600;
+}
+
+.storage-percentage {
+  @apply font-medium;
+}
+
+/* Action Buttons */
+.detail-actions {
+  @apply flex gap-2 pt-2;
+}
+
+.action-button {
+  @apply flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex-1;
+}
+
+.sync-button {
+  @apply bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.sync-button:disabled {
+  @apply bg-gray-400 cursor-not-allowed hover:bg-gray-400;
+}
+
+.close-button {
+  @apply bg-gray-200 text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+  flex: 0 0 auto;
+  min-width: 60px;
+}
+
+/* Button Spinner */
+.button-spinner {
+  @apply w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2;
+}
+
+/* Status Tips */
+.status-tip {
+  @apply flex items-start p-3 rounded-lg;
+}
+
+.offline-tip {
+  @apply bg-yellow-50 border border-yellow-200;
+}
+
+.error-tip {
+  @apply bg-red-50 border border-red-200;
+}
+
+.tip-icon {
+  @apply text-lg mr-3 flex-shrink-0;
+}
+
+.tip-content {
+  @apply flex-1;
+}
+
+.tip-title {
+  @apply text-sm font-medium text-gray-900 mb-1;
+}
+
+.tip-description {
+  @apply text-xs text-gray-600;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .status-bar-main {
+    @apply p-2;
+  }
+  
+  .status-indicator {
+    @apply w-6 h-6 mr-2;
+  }
+  
+  .status-icon {
+    @apply text-xs;
+  }
+  
+  .status-label {
+    @apply text-xs;
+  }
+  
+  .status-description {
+    @apply hidden;
+  }
+  
+  .detail-grid {
+    @apply gap-1;
+  }
+  
+  .detail-actions {
+    @apply flex-col gap-2;
+  }
+  
+  .action-button {
+    @apply w-full;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .status-bar {
+    @apply bg-gray-800 border-gray-700;
+  }
+  
+  .status-bar-main:hover {
+    @apply bg-gray-700;
+  }
+  
+  .status-label {
+    @apply text-gray-100;
+  }
+  
+  .status-description {
+    @apply text-gray-400;
+  }
+  
+  .status-bar-details {
+    @apply bg-gray-700 border-gray-600;
+  }
+  
+  .detail-title {
+    @apply text-gray-100;
+  }
+  
+  .detail-label {
+    @apply text-gray-400;
+  }
+  
+  .detail-value {
+    @apply text-gray-200;
+  }
+  
+  .storage-bar {
+    @apply bg-gray-600;
+  }
+  
+  .storage-text {
+    @apply text-gray-400;
+  }
+  
+  .close-button {
+    @apply bg-gray-600 text-gray-200 hover:bg-gray-500;
+  }
+  
+  .offline-tip {
+    @apply bg-yellow-900 border-yellow-700;
+  }
+  
+  .error-tip {
+    @apply bg-red-900 border-red-700;
+  }
+  
+  .tip-title {
+    @apply text-gray-100;
+  }
+  
+  .tip-description {
+    @apply text-gray-400;
+  }
+}
+
+/* Animation for status changes */
+.status-indicator {
+  animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Disable animation for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .status-indicator {
+    animation: none;
+  }
+  
+  .sync-spinner,
+  .button-spinner {
+    animation: none;
+  }
+  
+  * {
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .status-bar {
+    @apply border-2 border-black;
+  }
+  
+  .status-indicator {
+    @apply border-2 border-black;
+  }
+  
+  .action-button {
+    @apply border-2 border-black;
+  }
+}
+
+/* Focus styles for accessibility */
+.status-bar-main:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+.action-button:focus {
+  @apply outline-none;
+}
+
+/* Print styles */
+@media print {
+  .status-bar {
+    @apply hidden;
+  }
+} 

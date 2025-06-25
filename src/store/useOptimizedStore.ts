@@ -13,6 +13,7 @@ import type {
 import { defaultNotificationPreferences } from '../types';
 import { STORAGE_KEYS } from '../utils/constants';
 import { mockActivities, mockAnnouncements } from '../data/mockData';
+import { ActivityService } from '../services/api/activityService';
 
 /**
  * Optimized Store Architecture
@@ -71,9 +72,13 @@ interface ActivityActions {
   updateActivity: (id: string, updates: Partial<Activity>) => void;
   removeActivity: (id: string) => void;
   
+  // API Integration
+  fetchActivities: () => Promise<void>;
+  refreshActivities: () => Promise<void>;
+  
   // Activity Participation
-  joinActivity: (activityId: string, userId: string) => Promise<void>;
-  leaveActivity: (activityId: string, userId: string) => Promise<void>;
+  joinActivity: (activityId: string) => Promise<void>;
+  leaveActivity: (activityId: string) => Promise<void>;
   
   // Filter Management
   setSearchText: (text: string) => void;
@@ -155,10 +160,10 @@ export const useOptimizedStore = createWithEqualityFn<OptimizedStore>()(
           isAuthenticated: false,
           isLoading: false,
           
-          // Activity State - Initialize with mock activities
-          activities: mockActivities,
+          // Activity State - Start with empty array, will be populated by API calls
+          activities: [],
           currentActivity: null,
-          totalActivities: mockActivities.length,
+          totalActivities: 0,
           isLoadingActivities: false,
           searchText: '',
           selectedTypes: [],
@@ -289,88 +294,57 @@ export const useOptimizedStore = createWithEqualityFn<OptimizedStore>()(
               }
             }),
 
-          // Optimized participation actions with error handling
-          joinActivity: async (activityId, userId) => {
+          // Optimized participation actions with real API calls
+          joinActivity: async (activityId: string) => {
+            const state = _get();
+            if (!state.user) {
+              throw new Error('User not authenticated');
+            }
+            
             try {
-              // Simulate API call with timeout
-              await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                  resolve(void 0);
-                }, 500);
-                
-                // Simulate occasional network failure for testing
-                if (Math.random() < 0.05) {
-                  clearTimeout(timeout);
-                  reject(new Error('Network error'));
+              // Implement join activity API call
+              const response = await fetch(`/api/activities/${activityId}/join`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${state.user.token}`
                 }
               });
               
-              set((state) => {
-                const updateActivityParticipation = (activity: Activity) => {
-                  if (!activity.participantIds?.includes(userId) && 
-                      (activity.participantCount || 0) < activity.slotMax) {
-                    activity.participantIds = [...(activity.participantIds || []), userId];
-                    activity.participantCount = (activity.participantCount || 0) + 1;
-                    return true;
-                  }
-                  return false;
-                };
-
-                // Update in activities array
-                const activityIndex = state.activities.findIndex(act => act.id === activityId);
-                if (activityIndex !== -1) {
-                  updateActivityParticipation(state.activities[activityIndex]);
-                }
-                
-                // Update current activity if it matches
-                if (state.currentActivity?.id === activityId) {
-                  updateActivityParticipation(state.currentActivity);
-                }
-              });
+              if (!response.ok) {
+                throw new Error('Failed to join activity');
+              }
+              
+              // Refresh activities after joining
+              await _get().fetchActivities();
             } catch (error) {
-              console.error('Failed to join activity:', error);
               throw error;
             }
           },
 
-          leaveActivity: async (activityId, userId) => {
+          leaveActivity: async (activityId: string) => {
+            const state = _get();
+            if (!state.user) {
+              throw new Error('User not authenticated');
+            }
+            
             try {
-              // Simulate API call
-              await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                  resolve(void 0);
-                }, 500);
-                
-                // Simulate occasional network failure for testing
-                if (Math.random() < 0.05) {
-                  clearTimeout(timeout);
-                  reject(new Error('Network error'));
+              // Implement leave activity API call
+              const response = await fetch(`/api/activities/${activityId}/leave`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${state.user.token}`
                 }
               });
               
-              set((state) => {
-                const updateActivityParticipation = (activity: Activity) => {
-                  if (activity.participantIds?.includes(userId)) {
-                    activity.participantIds = activity.participantIds.filter(id => id !== userId);
-                    activity.participantCount = Math.max(0, (activity.participantCount || 0) - 1);
-                    return true;
-                  }
-                  return false;
-                };
-
-                // Update in activities array
-                const activityIndex = state.activities.findIndex(act => act.id === activityId);
-                if (activityIndex !== -1) {
-                  updateActivityParticipation(state.activities[activityIndex]);
-                }
-                
-                // Update current activity if it matches
-                if (state.currentActivity?.id === activityId) {
-                  updateActivityParticipation(state.currentActivity);
-                }
-              });
+              if (!response.ok) {
+                throw new Error('Failed to leave activity');
+              }
+              
+              // Refresh activities after leaving
+              await _get().fetchActivities();
             } catch (error) {
-              console.error('Failed to leave activity:', error);
               throw error;
             }
           },
@@ -423,6 +397,77 @@ export const useOptimizedStore = createWithEqualityFn<OptimizedStore>()(
             set((state) => {
               state.isLoadingAnnouncements = loading;
             }),
+
+          // API Integration with fallback to mock data
+          fetchActivities: async () => {
+            try {
+              set((state) => {
+                state.isLoadingActivities = true;
+              });
+              
+              try {
+                const response = await ActivityService.getAll();
+                set((state) => {
+                  state.activities = response.activities || [];
+                  state.totalActivities = response.total || response.activities?.length || 0;
+                  state.isLoadingActivities = false;
+                  state.error = null;
+                });
+                console.log('[Store] Successfully fetched activities from API:', response.activities?.length);
+              } catch (apiError) {
+                console.warn('[Store] API call failed, falling back to mock data:', apiError);
+                // Fallback to mock data if API fails
+                set((state) => {
+                  state.activities = mockActivities;
+                  state.totalActivities = mockActivities.length;
+                  state.isLoadingActivities = false;
+                  state.error = 'Using mock data - API unavailable';
+                });
+              }
+            } catch (error) {
+              console.error('Failed to fetch activities:', error);
+              set((state) => {
+                state.isLoadingActivities = false;
+                state.error = error instanceof Error ? error.message : 'Failed to fetch activities';
+              });
+              throw error;
+            }
+          },
+
+          refreshActivities: async () => {
+            try {
+              set((state) => {
+                state.isLoadingActivities = true;
+              });
+              
+              try {
+                const response = await ActivityService.getAll();
+                set((state) => {
+                  state.activities = response.activities || [];
+                  state.totalActivities = response.total || response.activities?.length || 0;
+                  state.isLoadingActivities = false;
+                  state.error = null;
+                });
+                console.log('[Store] Successfully refreshed activities from API:', response.activities?.length);
+              } catch (apiError) {
+                console.warn('[Store] API refresh failed, falling back to mock data:', apiError);
+                // Fallback to mock data if API fails
+                set((state) => {
+                  state.activities = mockActivities;
+                  state.totalActivities = mockActivities.length;
+                  state.isLoadingActivities = false;
+                  state.error = 'Using mock data - API unavailable';
+                });
+              }
+            } catch (error) {
+              console.error('Failed to refresh activities:', error);
+              set((state) => {
+                state.isLoadingActivities = false;
+                state.error = error instanceof Error ? error.message : 'Failed to refresh activities';
+              });
+              throw error;
+            }
+          },
         }))
       ),
       {
@@ -539,6 +584,8 @@ export const useActivityActions = () => useOptimizedStore((state) => ({
   joinActivity: state.joinActivity,
   leaveActivity: state.leaveActivity,
   setActivityLoading: state.setActivityLoading,
+  fetchActivities: state.fetchActivities,
+  refreshActivities: state.refreshActivities,
 }));
 
 export const useFilterActions = () => useOptimizedStore((state) => ({

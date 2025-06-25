@@ -1,3 +1,7 @@
+import dayjs from 'dayjs';
+
+export { dayjs };
+
 /**
  * Centralized constants to eliminate redundancy
  * Single source of truth for all application constants

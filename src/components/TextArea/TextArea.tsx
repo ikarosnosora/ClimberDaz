@@ -7,6 +7,7 @@ interface TextAreaProps {
   rows?: number;
   maxLength?: number;
   disabled?: boolean;
+  className?: string;
 }
 
 const TextArea: React.FC<TextAreaProps> = ({
@@ -16,6 +17,7 @@ const TextArea: React.FC<TextAreaProps> = ({
   rows = 2,
   maxLength,
   disabled,
+  className = "",
 }) => {
   return (
     <textarea
@@ -25,7 +27,7 @@ const TextArea: React.FC<TextAreaProps> = ({
       rows={rows}
       maxLength={maxLength}
       disabled={disabled}
-      className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none disabled:bg-gray-100"
+      className={`w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 resize-none disabled:bg-gray-100 ${className}`}
     />
   );
 };
