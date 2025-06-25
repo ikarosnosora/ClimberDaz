@@ -25,7 +25,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error to console for development
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    if (import.meta.env.DEV) {
+      console.error('ErrorBoundary caught an error:', error, errorInfo);
+    }
     
     // Call custom error handler if provided
     this.props.onError?.(error, errorInfo);
@@ -39,11 +41,6 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleReset = () => {
     this.setState({ hasError: false, error: undefined });
-  };
-
-  private handleRetry = () => {
-    this.handleReset();
-    window.location.reload();
   };
 
   render() {
@@ -92,8 +89,6 @@ export class ErrorBoundary extends Component<Props, State> {
                     background: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
                     boxShadow: '0 2px 8px rgba(255, 126, 95, 0.3)',
                     outline: 'none',
-                    focusRing: '2px solid rgba(255, 126, 95, 0.5)',
-                    focusRingOffset: '2px',
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = 'linear-gradient(135deg, #FF8E7B 0%, #FF5A88 100%)';
@@ -138,7 +133,9 @@ export class ErrorBoundary extends Component<Props, State> {
 // Hook version for functional components
 export const useErrorHandler = () => {
   return (error: Error, errorInfo?: ErrorInfo) => {
-    console.error('Component error:', error, errorInfo);
+    if (import.meta.env.DEV) {
+      console.error('Component error:', error, errorInfo);
+    }
     showError('出现了一个错误，请重试');
   };
 }; 

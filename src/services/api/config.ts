@@ -1,4 +1,4 @@
-// API base URL - will be set from environment variables in production
+// API base URL - configurable via environment variables
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
 export const config = {

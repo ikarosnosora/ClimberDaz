@@ -79,7 +79,8 @@ const ReviewHistory: React.FC<ReviewHistoryProps> = ({
   const loadReviewData = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API calls
+              // INTEGRATION: Replace with actual review API calls when review service is connected
+        // This component currently uses mock data for development
       await Promise.all([
         loadReviews(),
         showStats && loadStats(),

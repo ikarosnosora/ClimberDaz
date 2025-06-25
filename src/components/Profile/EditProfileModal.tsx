@@ -61,6 +61,7 @@ const FormTextArea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement> &
 const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose }) => {
   const { user } = useUserSelector();
   const { updateUserProfile } = useUserActions();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<ProfileFormValues>({
     nickname: '',
     city: '',
@@ -139,7 +140,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose })
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!user || !validateForm()) return;
+    if (!user || !validateForm() || isLoading) return;
 
     const processedValues: Partial<User> = {
       ...formData,
@@ -150,12 +151,15 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose })
     };
 
     try {
+      setIsLoading(true);
       updateUserProfile(processedValues);
       showSuccess(SUCCESS_MESSAGES.PROFILE_UPDATED);
       onClose();
     } catch (error) {
       showError(ERROR_MESSAGES.SERVER_ERROR);
       console.error('Failed to update profile:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -278,7 +282,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose })
                 : 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
               boxShadow: '0 2px 8px rgba(255, 126, 95, 0.3)',
               outline: 'none',
-              focusRing: '2px solid rgba(255, 126, 95, 0.5)',
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {

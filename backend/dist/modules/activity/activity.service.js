@@ -47,7 +47,7 @@ let ActivityService = class ActivityService {
         return this.findOne(savedActivity.id);
     }
     async findAll(queryDto) {
-        const { page = 1, limit = 10, search, includePrivate = false, ...filters } = queryDto;
+        const { page = 1, limit = 10, search, includePrivate: _includePrivate = false, ...filters } = queryDto;
         const queryBuilder = this.activityRepository.createQueryBuilder('activity')
             .leftJoinAndSelect('activity.organizer', 'organizer')
             .leftJoinAndSelect('activity.gym', 'gym')

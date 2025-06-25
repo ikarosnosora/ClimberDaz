@@ -157,7 +157,8 @@ const Login: React.FC = () => {
     }
 
     try {
-      // TODO: Implement verification code sending
+              // FUTURE: Implement SMS verification code sending when SMS provider is configured
+        // This requires external SMS service integration (e.g., Twilio, Aliyun SMS)
       showSuccess('验证码已发送到您的手机');
     } catch (error) {
       showError('发送验证码失败，请重试');

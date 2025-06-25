@@ -152,7 +152,12 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
   const computedValues = useMemo(() => {
     const isActivityFull = (activity.participantCount || 0) >= activity.slotMax;
     const isActivityStarted = dayjs(activity.datetime).isBefore(dayjs());
-    const formattedDateTime = dayjs(activity.datetime).format('MM月DD日 HH:mm');
+    
+    // Use timeRange from backend if available, otherwise fallback to formatted datetime
+    const formattedDateTime = activity.timeRange 
+      ? `${dayjs(activity.startDatetime || activity.datetime).format('MM月DD日')} ${activity.timeRange}`
+      : dayjs(activity.datetime).format('MM月DD日 HH:mm');
+    
     const participantText = `${activity.participantCount || 0}/${activity.slotMax}人`;
     const distanceText = activity.distance !== undefined && activity.distance !== null 
       ? `${activity.distance.toFixed(1)}km` 
@@ -165,7 +170,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({
       participantText,
       distanceText,
     };
-  }, [activity.participantCount, activity.slotMax, activity.datetime, activity.distance]);
+  }, [activity.participantCount, activity.slotMax, activity.datetime, activity.startDatetime, activity.timeRange, activity.distance]);
 
   // Memoized activity types with enhanced styling
   const activityTypeTags = useMemo(() => {

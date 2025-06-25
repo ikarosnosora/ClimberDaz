@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, FindOptionsWhere, Like, Between, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Activity, ActivityStatus, ActivityPrivacy } from './entities/activity.entity';
 import { CreateActivityDto, UpdateActivityDto, QueryActivityDto } from './dto';
 import { ClimbingGymService } from '../climbing-gym/climbing-gym.service';
@@ -47,7 +47,7 @@ export class ActivityService {
   }
 
   async findAll(queryDto: QueryActivityDto): Promise<{ data: Activity[]; total: number; page: number; limit: number }> {
-    const { page = 1, limit = 10, search, includePrivate = false, ...filters } = queryDto;
+    const { page = 1, limit = 10, search, includePrivate: _includePrivate = false, ...filters } = queryDto;
     
     const queryBuilder = this.activityRepository.createQueryBuilder('activity')
       .leftJoinAndSelect('activity.organizer', 'organizer')
@@ -289,7 +289,8 @@ export class ActivityService {
     
     // For now, we'll return just the organizer since we don't have a participants table
     // In a full implementation, you would have a separate participants table
-    // TODO: Add proper participant tracking table
+    // ARCHITECTURE: Consider adding dedicated participant tracking table for better relational data
+    // Current implementation uses simple counter, but separate table would enable better analytics
     return [activity.organizerId];
   }
 

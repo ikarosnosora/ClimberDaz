@@ -25,7 +25,10 @@ export interface Activity {
   id: string;
   hostId: string;
   title: string;
-  datetime: Date;
+  datetime: Date; // Keep for backward compatibility
+  startDatetime?: Date; // New field from backend
+  endDatetime?: Date; // New field from backend
+  timeRange?: string; // Computed time range from backend (e.g., "14:00-16:00")
   locationText: string;
   lat: number;
   lng: number;
@@ -45,6 +48,12 @@ export interface Activity {
   reviews?: Review[];
   distance?: number;
   host?: User;
+  // Additional backend fields
+  gymId?: string;
+  gymAddress?: string;
+  gymCity?: string;
+  canJoin?: boolean;
+  minutesToStart?: number;
 }
 
 // Participation related types

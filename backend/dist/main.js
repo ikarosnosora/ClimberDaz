@@ -3,16 +3,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@nestjs/core");
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const config_1 = require("@nestjs/config");
 const app_module_1 = require("./app.module");
+const security_config_1 = require("./config/security.config");
 const compression = require("compression");
 const helmet = require("helmet");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
-    app.use(helmet.default());
+    const configService = app.get(config_1.ConfigService);
+    const securityConfig = (0, security_config_1.getSecurityConfig)(configService);
+    app.use(helmet.default({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'"],
+                styleSrc: ["'self'", "'unsafe-inline'"],
+                scriptSrc: ["'self'"],
+                imgSrc: ["'self'", "data:", "https:"],
+            },
+        },
+        crossOriginEmbedderPolicy: false,
+    }));
     app.use(compression());
     app.enableCors({
-        origin: ['http://localhost:3000', 'http://localhost:5173'],
-        credentials: true,
+        origin: securityConfig.cors.origins,
+        credentials: securityConfig.cors.credentials,
+        methods: securityConfig.cors.methods,
+        allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+        exposedHeaders: ['X-Total-Count'],
     });
     app.useGlobalPipes(new common_1.ValidationPipe({
         transform: true,

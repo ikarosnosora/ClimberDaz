@@ -12,7 +12,7 @@ const NotificationContainer: React.FC = () => {
 
   if (!notifications.length) return null;
 
-  const getNotificationStyles = (type: string) => {
+  const getNotificationStyles = (type?: string) => {
     switch (type) {
       case 'success':
         return {

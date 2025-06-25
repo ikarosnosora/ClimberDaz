@@ -162,7 +162,9 @@ const MyActivities: React.FC = () => {
     
     // Fetch activities if not loaded yet
     if (allActivities.length === 0 && !storeLoading) {
-      console.log('[MyActivities] Fetching activities from API...');
+              if (import.meta.env.DEV) {
+          console.log('[MyActivities] Fetching activities from API...');
+        }
       fetchActivities().catch((error: any) => {
         console.error('[MyActivities] Failed to fetch activities:', error);
       });

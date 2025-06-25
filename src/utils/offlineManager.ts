@@ -424,7 +424,7 @@ class OfflineManager {
    * Get API endpoint for entity
    */
   private getApiEndpoint(entity: string): string {
-    const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:3002/api';
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
     const endpoints = {
       activity: `${baseUrl}/activities`,
       user: `${baseUrl}/users`,
@@ -656,7 +656,8 @@ class OfflineManager {
           await this.syncOperation(operation);
           
           // Assume success for now since response is void
-          // TODO: Fix return type of syncOperation to include success status
+          // IMPROVEMENT: Consider enhancing return type of syncOperation to include success status
+  // Current implementation logs errors but doesn't return detailed status information
           // Update local data sync status
           const entityStore = operation.entity + 's' as keyof ClimberDB;
           const localData = await this.db.get(entityStore as any, operation.entityId);

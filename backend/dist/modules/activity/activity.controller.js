@@ -27,6 +27,7 @@ let ActivityController = class ActivityController {
         return this.activityService.create(createActivityDto, req.user.userId);
     }
     async findAll(queryDto) {
+        console.log('[ActivityController] GET /activities called with query:', queryDto);
         return this.activityService.findAll(queryDto);
     }
     async getMyActivities(queryDto, req) {

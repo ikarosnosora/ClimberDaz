@@ -129,12 +129,16 @@ const ActivityList: React.FC = () => {
 
   // Fetch activities on component mount
   useEffect(() => {
-    console.log('[ActivityList Debug] Component mounted');
-    console.log('[ActivityList Debug] debugInfo:', debugInfo);
+          if (import.meta.env.DEV) {
+        console.log('[ActivityList Debug] Component mounted');
+        console.log('[ActivityList Debug] debugInfo:', debugInfo);
+      }
     
     // Only fetch if we don't have activities loaded yet
     if (allActivities.length === 0 && !storeLoading) {
-      console.log('[ActivityList] Fetching activities from API...');
+      if (import.meta.env.DEV) {
+        console.log('[ActivityList] Fetching activities from API...');
+      }
       fetchActivities().catch((error) => {
         console.error('[ActivityList] Failed to fetch activities:', error);
         showError('获取活动列表失败，请检查网络连接');
@@ -207,7 +211,9 @@ const ActivityList: React.FC = () => {
 
     const endTime = performance.now();
     if (endTime - startTime > 10) {
-      console.log(`[ActivityList Performance] Filtering took ${(endTime - startTime).toFixed(2)}ms`);
+      if (import.meta.env.DEV) {
+        console.log(`[ActivityList Performance] Filtering took ${(endTime - startTime).toFixed(2)}ms`);
+      }
     }
 
     return sorted;
@@ -248,7 +254,9 @@ const ActivityList: React.FC = () => {
     
     setIsRefreshing(true);
     try {
-      console.log('[ActivityList] Refreshing activities from API...');
+              if (import.meta.env.DEV) {
+          console.log('[ActivityList] Refreshing activities from API...');
+        }
       await refreshActivities();
       setDisplayedActivitiesCount(ITEMS_PER_PAGE);
       setShowSearchResults(false);

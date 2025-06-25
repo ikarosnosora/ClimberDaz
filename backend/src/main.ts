@@ -1,21 +1,40 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
+import { getSecurityConfig } from './config/security.config';
 import * as compression from 'compression';
 import * as helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Get configuration services
+  const configService = app.get(ConfigService);
+  const securityConfig = getSecurityConfig(configService);
+
   // Security middleware
-  app.use(helmet.default());
+  app.use(helmet.default({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", "data:", "https:"],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Allow embedding for development
+  }));
   app.use(compression());
 
-  // Enable CORS for frontend
+  // Enhanced CORS configuration
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:5173'], // React dev servers
-    credentials: true,
+    origin: securityConfig.cors.origins,
+    credentials: securityConfig.cors.credentials,
+    methods: securityConfig.cors.methods,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+    exposedHeaders: ['X-Total-Count'],
   });
 
   // Global validation pipe

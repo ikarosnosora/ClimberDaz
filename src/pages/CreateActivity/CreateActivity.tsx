@@ -66,7 +66,8 @@ const SparklesIcon = () => (
 // import markerIcon from 'leaflet/dist/images/marker-icon.png';
 // import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// TODO: Fix for default Leaflet marker icon issue with webpack when map is implemented
+    // FUTURE: Fix for default Leaflet marker icon issue with webpack when map feature is implemented
+    // This issue will need to be addressed when adding map visualization for gym locations
 // delete (L.Icon.Default.prototype as any)._getIconUrl;
 // L.Icon.Default.mergeOptions({
 //   iconRetinaUrl: markerIcon2x,

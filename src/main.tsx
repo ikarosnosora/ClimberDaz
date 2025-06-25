@@ -73,8 +73,10 @@ console.warn = (...args) => {
 
 // Phase 4: Initialize performance monitoring for Phase 4
 if (process.env.NODE_ENV === 'development' || localStorage.getItem('enablePerformanceMonitoring') === 'true') {
-  console.log('🚀 ClimberDaz Phase 4 Performance Monitoring Enabled');
-  console.log('📊 Features: Advanced Web Vitals, Bundle Analysis, Memory Tracking, Component Performance');
+      if (import.meta.env.DEV) {
+      console.log('🚀 ClimberDaz Phase 4 Performance Monitoring Enabled');
+      console.log('📊 Features: Advanced Web Vitals, Bundle Analysis, Memory Tracking, Component Performance');
+    }
   
   // Start application performance measurement
   advancedPerformanceMonitor.start('app-initialization');
@@ -86,11 +88,13 @@ if (process.env.NODE_ENV === 'development' || localStorage.getItem('enablePerfor
 // Phase 4: Performance monitoring message (development only)
 if (process.env.NODE_ENV === 'development') {
   console.group('🎯 ClimberDaz Phase 4 Performance Features');
-  console.log('✅ Advanced Web Vitals Monitoring');
-  console.log('✅ Bundle Size Analysis & Optimization');
-  console.log('✅ Memory Usage Tracking & Warnings');
-  console.log('✅ Component Render Performance Monitoring');
-  console.log('✅ Performance Budget Enforcement');
+  if (import.meta.env.DEV) {
+    console.log('✅ Advanced Web Vitals Monitoring');
+    console.log('✅ Bundle Size Analysis & Optimization');
+    console.log('✅ Memory Usage Tracking & Warnings');
+    console.log('✅ Component Render Performance Monitoring');
+    console.log('✅ Performance Budget Enforcement');
+  }
   console.groupEnd();
 }
 
@@ -115,8 +119,10 @@ if (process.env.NODE_ENV === 'development' || localStorage.getItem('enablePerfor
     setTimeout(() => {
       const webVitals = advancedPerformanceMonitor.getWebVitals();
       console.group('📊 Initial Performance Metrics');
-      console.log('Web Vitals:', webVitals);
-      console.log('Performance Report:', advancedPerformanceMonitor.generateReport());
+      if (import.meta.env.DEV) {
+        console.log('Web Vitals:', webVitals);
+        console.log('Performance Report:', advancedPerformanceMonitor.generateReport());
+      }
       console.groupEnd();
     }, 1000);
   });

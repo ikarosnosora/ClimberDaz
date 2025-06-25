@@ -121,7 +121,7 @@ const App: React.FC = () => {
 
   // Memoized debug logging to prevent function recreation
   const logDebugInfo = useCallback((message: string, data?: any) => {
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       console.log(`[App Debug] ${message}`, data !== undefined ? data : '');
     }
   }, []);
@@ -147,7 +147,7 @@ const App: React.FC = () => {
 
   // Memoized service worker registration
   const registerServiceWorker = useCallback(() => {
-    if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+    if ('serviceWorker' in navigator && import.meta.env.PROD) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
           .then((registration) => {

@@ -413,7 +413,9 @@ export const useOptimizedStore = createWithEqualityFn<OptimizedStore>()(
                   state.isLoadingActivities = false;
                   state.error = null;
                 });
-                console.log('[Store] Successfully fetched activities from API:', response.activities?.length);
+                if (import.meta.env.DEV) {
+          console.log('[Store] Successfully fetched activities from API:', response.activities?.length);
+        }
               } catch (apiError) {
                 console.warn('[Store] API call failed, falling back to mock data:', apiError);
                 // Fallback to mock data if API fails
@@ -448,7 +450,9 @@ export const useOptimizedStore = createWithEqualityFn<OptimizedStore>()(
                   state.isLoadingActivities = false;
                   state.error = null;
                 });
-                console.log('[Store] Successfully refreshed activities from API:', response.activities?.length);
+                if (import.meta.env.DEV) {
+          console.log('[Store] Successfully refreshed activities from API:', response.activities?.length);
+        }
               } catch (apiError) {
                 console.warn('[Store] API refresh failed, falling back to mock data:', apiError);
                 // Fallback to mock data if API fails
@@ -483,7 +487,9 @@ export const useOptimizedStore = createWithEqualityFn<OptimizedStore>()(
         // Add version and migration support
         version: 1,
         migrate: (persistedState: any, version: number) => {
-          console.log(`[Store] Migrating state from version ${version} to 1`);
+          if (import.meta.env.DEV) {
+            console.log(`[Store] Migrating state from version ${version} to 1`);
+          }
           
           // Handle migration from older versions
           if (version === 0 || !version) {
@@ -513,7 +519,9 @@ export const useOptimizedStore = createWithEqualityFn<OptimizedStore>()(
               // Clear corrupted storage
               localStorage.removeItem(STORAGE_KEYS.USER_PREFERENCES);
             } else {
-              console.log('[Store] State rehydrated successfully');
+              if (import.meta.env.DEV) {
+          console.log('[Store] State rehydrated successfully');
+        }
             }
           };
         },
@@ -610,7 +618,9 @@ if (process.env.NODE_ENV === 'development') {
         state[key as keyof typeof state] !== prevState[key as keyof typeof prevState]
       );
       if (changedKeys.length > 0) {
-        console.log('[Store Debug] State changed:', changedKeys);
+        if (import.meta.env.DEV) {
+          console.log('[Store Debug] State changed:', changedKeys);
+        }
       }
     }
   );

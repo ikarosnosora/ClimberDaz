@@ -22,37 +22,7 @@ interface ReviewFormData {
   comment: string;
 }
 
-// Update the REVIEW_TYPES to use gradient colors
-const REVIEW_TYPES = {
-  POSITIVE: { 
-    icon: '👍', 
-    color: '#10B981', 
-    gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-    bgColor: 'rgba(16, 185, 129, 0.08)',
-    textColor: '#047857'
-  },
-  NEGATIVE: { 
-    icon: '👎', 
-    color: '#EF4444', 
-    gradient: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
-    bgColor: 'rgba(239, 68, 68, 0.08)',
-    textColor: '#B91C1C'
-  },
-  NEUTRAL: { 
-    icon: '🤷‍♂️', 
-    color: '#6B7280', 
-    gradient: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)',
-    bgColor: 'rgba(107, 114, 128, 0.08)',
-    textColor: '#374151'
-  },
-  MIXED: { 
-    icon: '⚖️', 
-    color: '#FF7E5F', 
-    gradient: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
-    bgColor: 'rgba(255, 126, 95, 0.08)',
-    textColor: '#E91E63'
-  },
-};
+
 
 export const ReviewForm: React.FC = () => {
   const { activityId, targetId } = useParams<{ activityId: string; targetId: string }>();
@@ -68,7 +38,8 @@ export const ReviewForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: Replace with actual API call
+    // INTEGRATION: Replace with actual review submission API call
+  // This currently uses mock submission for development testing
     // For now, using mock data
     if (activityId && targetId) {
       setTarget({
@@ -86,8 +57,8 @@ export const ReviewForm: React.FC = () => {
     setError(null);
   };
 
-  const handleCommentChange = (comment: string) => {
-    setFormData(prev => ({ ...prev, comment }));
+  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, comment: e.target.value }));
   };
 
   const handleSubmit = async (e?: React.MouseEvent<HTMLButtonElement>) => {

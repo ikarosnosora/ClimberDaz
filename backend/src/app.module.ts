@@ -1,8 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CacheModule } from '@nestjs/cache-manager';
-import { BullModule } from '@nestjs/bull';
 // import * as redisStore from 'cache-manager-redis-store';
 
 // Import modules
@@ -17,8 +16,9 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { DemoController } from './demo.controller';
 
 // Import configuration
-import { DatabaseConfig } from './config/database.config';
-import { RedisConfig } from './config/redis.config';
+// Configuration imports
+// import { DatabaseConfig } from './config/database.config';
+// import { RedisConfig } from './config/redis.config';
 
 @Module({
   imports: [

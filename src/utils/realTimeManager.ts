@@ -53,7 +53,7 @@ class RealTimeManager {
     this.currentUserId = userId;
 
     try {
-      this.socket = io(process.env.REACT_APP_WS_URL || 'ws://localhost:3002', {
+      this.socket = io(import.meta.env.VITE_WS_URL || 'ws://localhost:3001', {
         auth: {
           token,
           userId

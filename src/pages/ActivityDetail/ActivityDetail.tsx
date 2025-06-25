@@ -371,7 +371,10 @@ const ActivityDetail: React.FC = () => {
                 <ClockIcon className="w-5 h-5" />
               </div>
               <span className="font-medium" style={{ color: colors.neutral[700] }}>
-                {dayjs(localCurrentActivity.datetime).format('MM月DD日 HH:mm')}
+                {localCurrentActivity.timeRange 
+                  ? `${dayjs(localCurrentActivity.startDatetime || localCurrentActivity.datetime).format('MM月DD日')} ${localCurrentActivity.timeRange}`
+                  : dayjs(localCurrentActivity.datetime).format('MM月DD日 HH:mm')
+                }
               </span>
             </div>
             

@@ -8,10 +8,9 @@ import {
   Max, 
   IsUUID, 
   IsDateString,
-  Length,
-  IsDate
+  Length
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
+// import { Transform, Type } from 'class-transformer'; // Unused imports
 import { ActivityPrivacy, ClimbingType } from '../entities/activity.entity';
 
 export class CreateActivityDto {
