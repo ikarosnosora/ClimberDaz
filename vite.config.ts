@@ -12,8 +12,7 @@ export default defineConfig({
       // Enable React optimization features
       babel: {
         plugins: [
-          // Remove PropTypes in production for smaller bundle
-          process.env.NODE_ENV === 'production' && 'babel-plugin-transform-remove-prop-types'
+          // Note: PropTypes removal is handled by React plugin automatically
         ].filter(Boolean),
       },
     })
@@ -109,7 +108,7 @@ export default defineConfig({
             './src/pages/AdminDashboardPage/AdminDashboardPage.tsx'
           ],
           'utils': [
-            './src/utils/performance.tsx',
+            './src/utils/performance.ts',
             './src/utils/notifications.ts',
             './src/utils/designSystem.ts',
             './src/utils/offlineManager.ts',
