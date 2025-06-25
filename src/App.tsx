@@ -14,7 +14,7 @@ import MainLayout from './components/MainLayout/MainLayout';
 const Loading = React.memo(() => (
   <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-purple-50">
     <div className="relative">
-      <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-500 mb-4"></div>
+      <div className="animate-spin rounded-full h-16 w-16 border-4 border-t-transparent mb-4"></div>
       <div className="absolute inset-0 flex items-center justify-center text-2xl animate-bounce">
         🧗‍♀️
       </div>
@@ -28,7 +28,12 @@ Loading.displayName = 'Loading';
 const AppLoading = React.memo(() => (
   <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-50 to-purple-50">
     <div className="relative">
-      <div className="animate-pulse rounded-full h-20 w-20 bg-blue-200 mb-4"></div>
+      <div 
+        className="animate-pulse rounded-full h-20 w-20 mb-4 mx-auto"
+        style={{
+          background: 'linear-gradient(135deg, rgba(255, 126, 95, 0.2) 0%, rgba(255, 69, 114, 0.1) 100%)',
+        }}
+      ></div>
       <div className="absolute inset-0 flex items-center justify-center text-3xl">
         🧗‍♀️
       </div>

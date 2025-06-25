@@ -170,9 +170,22 @@ const AnnouncementManagement: React.FC = () => {
         {/* Title is now part of the parent AdminDashboardPage section card */}
         <button
           onClick={handleAdd}
-          className="flex items-center bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-3 rounded-md shadow-sm transition duration-150 ease-in-out"
+          className="flex items-center text-white text-sm font-medium py-2 px-3 rounded-md shadow-sm transition-all duration-200 hover:scale-105"
+          style={{
+            background: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
+            boxShadow: '0 2px 8px rgba(255, 126, 95, 0.3)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #FF8E7B 0%, #FF5A88 100%)';
+            e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 126, 95, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 126, 95, 0.3)';
+          }}
         >
-          <PlusIcon className="w-4 h-4 mr-2" /> 添加公告
+          <PlusIcon className="h-4 w-4 mr-1" />
+          新增公告
         </button>
       </div>
 
@@ -192,8 +205,18 @@ const AnnouncementManagement: React.FC = () => {
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <button onClick={() => handleEdit(ann)} className="p-1 text-blue-600 hover:text-blue-800 transition-colors">
-                      <EditIcon className="w-5 h-5" />
+                    <button 
+                      onClick={() => handleEdit(ann)} 
+                      className="p-1 transition-all duration-200 hover:scale-110"
+                      style={{ color: '#FF7E5F' }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#E91E63';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#FF7E5F';
+                      }}
+                    >
+                      <EditIcon className="h-4 w-4" />
                     </button>
                     <button onClick={() => handleDelete(ann.id)} className="p-1 text-red-600 hover:text-red-800 transition-colors">
                       <TrashIcon className="w-5 h-5" />
@@ -271,12 +294,31 @@ const AnnouncementManagement: React.FC = () => {
                 >
                   取消
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 border border-transparent rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                >
-                  保存
-                </button>
+                                  <button
+                    type="submit"
+                    className="px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md shadow-sm transition-all duration-200 hover:scale-105"
+                    style={{
+                      background: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
+                      boxShadow: '0 2px 8px rgba(255, 126, 95, 0.3)',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #FF8E7B 0%, #FF5A88 100%)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 126, 95, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 126, 95, 0.3)';
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.outline = '2px solid rgba(255, 126, 95, 0.5)';
+                      e.currentTarget.style.outlineOffset = '2px';
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.outline = 'none';
+                    }}
+                  >
+                    {editingAnnouncement ? '更新公告' : '创建公告'}
+                  </button>
               </div>
             </form>
           </div>

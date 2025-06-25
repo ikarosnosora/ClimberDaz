@@ -221,7 +221,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose })
                         : (formData.climbingPreferences || []).filter(p => p !== option.value);
                       setFormData(prev => ({ ...prev, climbingPreferences: newPreferences }));
                     }}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="h-4 w-4 rounded transition-colors"
+                    style={{
+                      accentColor: '#FF7E5F',
+                      borderColor: '#D1D5DB',
+                    }}
                   />
                   <span className="ml-2 text-sm text-gray-700">{option.label}</span>
                 </label>
@@ -252,7 +256,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose })
                         : (formData.gearTags || []).filter(g => g !== option.value);
                       setFormData(prev => ({ ...prev, gearTags: newGearTags }));
                     }}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="h-4 w-4 rounded transition-colors"
+                    style={{
+                      accentColor: '#FF7E5F',
+                      borderColor: '#D1D5DB',
+                    }}
                   />
                   <span className="ml-2 text-sm text-gray-700">{option.label}</span>
                 </label>
@@ -262,9 +270,37 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({ visible, onClose })
           
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-150 ease-in-out"
+            disabled={isLoading}
+            className="w-full text-white font-semibold py-2 px-4 rounded-md shadow-sm transition-all duration-200 disabled:opacity-50 hover:scale-105"
+            style={{
+              background: isLoading 
+                ? 'linear-gradient(135deg, #9CA3AF 0%, #6B7280 100%)'
+                : 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
+              boxShadow: '0 2px 8px rgba(255, 126, 95, 0.3)',
+              outline: 'none',
+              focusRing: '2px solid rgba(255, 126, 95, 0.5)',
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #FF8E7B 0%, #FF5A88 100%)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 126, 95, 0.4)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isLoading) {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 126, 95, 0.3)';
+              }
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.outline = '2px solid rgba(255, 126, 95, 0.5)';
+              e.currentTarget.style.outlineOffset = '2px';
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.outline = 'none';
+            }}
           >
-            保存
+            {isLoading ? '保存中...' : '保存更改'}
           </button>
         </form>
       </div>

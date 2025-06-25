@@ -58,9 +58,18 @@ const FilterSummary = React.memo<{
   if (!hasFilters) return null;
 
   return (
-    <div className="mb-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+    <div 
+      className="mb-2 p-3 rounded-lg border backdrop-blur-sm"
+      style={{
+        background: 'linear-gradient(135deg, rgba(255, 126, 95, 0.05) 0%, rgba(255, 69, 114, 0.03) 100%)',
+        borderColor: 'rgba(255, 126, 95, 0.2)',
+      }}
+    >
       <div className="flex items-center justify-between">
-        <div className="text-sm text-blue-700">
+        <div 
+          className="text-sm font-medium"
+          style={{ color: '#E91E63' }}
+        >
           <span>已应用筛选: </span>
           {selectedTypes.length > 0 && (
             <span className="font-medium">{selectedTypes.length} 种类型</span>
@@ -72,7 +81,11 @@ const FilterSummary = React.memo<{
         </div>
         <button
           onClick={onClearFilters}
-          className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+          className="text-sm font-medium underline transition-all duration-200 hover:scale-105"
+          style={{ 
+            color: '#FF7E5F',
+            textDecorationColor: '#FF7E5F'
+          }}
         >
           清除筛选
         </button>
@@ -288,7 +301,19 @@ const ActivityList: React.FC = () => {
           {!isFiltersApplied && (
             <button
               onClick={navigateToCreate}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+              className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 hover:-translate-y-0.5"
+            style={{
+              background: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
+              boxShadow: '0 4px 12px rgba(255, 126, 95, 0.3)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #FF8E7B 0%, #FF5A88 100%)';
+              e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 126, 95, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 126, 95, 0.3)';
+            }}
             >
               创建活动
             </button>
@@ -362,7 +387,13 @@ const ActivityList: React.FC = () => {
           <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 shadow-lg">
               <div className="flex items-center space-x-3">
-                <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent"></div>
+                <div 
+                className="animate-spin rounded-full h-6 w-6 border-2 border-t-transparent"
+                style={{
+                  borderColor: 'rgba(255, 126, 95, 0.3)',
+                  borderTopColor: '#FF7E5F',
+                }}
+              ></div>
                 <span className="text-gray-700">加载中...</span>
               </div>
             </div>

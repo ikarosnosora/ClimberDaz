@@ -136,7 +136,16 @@ const UserManagement: React.FC = () => {
                     <span className="px-2 py-0.5 text-xs font-semibold text-red-800 bg-red-100 rounded-full">已封禁</span>
                   }
                   {user.role === 'admin' && !user.isBanned &&
-                    <span className="px-2 py-0.5 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">管理员</span>
+                    <span 
+                      className="px-2 py-0.5 text-xs font-semibold rounded-full"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255, 126, 95, 0.15) 0%, rgba(255, 69, 114, 0.1) 100%)',
+                        color: '#E91E63',
+                        border: '1px solid rgba(255, 126, 95, 0.3)',
+                      }}
+                    >
+                      管理员
+                    </span>
                   }
                   <CustomPopoverMenu
                     actions={[
@@ -150,8 +159,23 @@ const UserManagement: React.FC = () => {
                         if (key === 'makeUser') handleChangeRole(user, 'user');
                     }}
                     trigger={
-                      <button className="flex items-center text-sm text-blue-600 hover:text-blue-800 p-1.5 rounded-md hover:bg-blue-50 transition-colors">
-                        <EditIcon className="w-4 h-4 mr-1" /> 操作
+                      <button 
+                        className="flex items-center text-sm p-1.5 rounded-md transition-all duration-200 hover:scale-105"
+                        style={{
+                          color: '#FF7E5F',
+                          background: 'rgba(255, 126, 95, 0.05)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = '#E91E63';
+                          e.currentTarget.style.background = 'rgba(255, 126, 95, 0.1)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = '#FF7E5F';
+                          e.currentTarget.style.background = 'rgba(255, 126, 95, 0.05)';
+                        }}
+                      >
+                        <EditIcon className="h-4 w-4 mr-1" />
+                        操作
                       </button>
                     }
                   />

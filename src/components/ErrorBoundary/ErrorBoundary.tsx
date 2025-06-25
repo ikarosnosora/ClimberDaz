@@ -41,6 +41,11 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined });
   };
 
+  private handleRetry = () => {
+    this.handleReset();
+    window.location.reload();
+  };
+
   render() {
     if (this.state.hasError) {
       // Custom fallback UI
@@ -82,16 +87,31 @@ export class ErrorBoundary extends Component<Props, State> {
               <div className="space-y-3">
                 <button
                   onClick={this.handleReset}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                  className="w-full text-white py-2 px-4 rounded-md transition-all duration-200 hover:scale-105 hover:-translate-y-0.5"
+                  style={{
+                    background: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
+                    boxShadow: '0 2px 8px rgba(255, 126, 95, 0.3)',
+                    outline: 'none',
+                    focusRing: '2px solid rgba(255, 126, 95, 0.5)',
+                    focusRingOffset: '2px',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #FF8E7B 0%, #FF5A88 100%)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 126, 95, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 126, 95, 0.3)';
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.outline = '2px solid rgba(255, 126, 95, 0.5)';
+                    e.currentTarget.style.outlineOffset = '2px';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.outline = 'none';
+                  }}
                 >
-                  重试
-                </button>
-                
-                <button
-                  onClick={() => window.location.reload()}
-                  className="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-                >
-                  刷新页面
+                  🔄 重新加载
                 </button>
               </div>
               

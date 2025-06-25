@@ -22,6 +22,38 @@ interface ReviewFormData {
   comment: string;
 }
 
+// Update the REVIEW_TYPES to use gradient colors
+const REVIEW_TYPES = {
+  POSITIVE: { 
+    icon: '👍', 
+    color: '#10B981', 
+    gradient: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+    bgColor: 'rgba(16, 185, 129, 0.08)',
+    textColor: '#047857'
+  },
+  NEGATIVE: { 
+    icon: '👎', 
+    color: '#EF4444', 
+    gradient: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+    bgColor: 'rgba(239, 68, 68, 0.08)',
+    textColor: '#B91C1C'
+  },
+  NEUTRAL: { 
+    icon: '🤷‍♂️', 
+    color: '#6B7280', 
+    gradient: 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)',
+    bgColor: 'rgba(107, 114, 128, 0.08)',
+    textColor: '#374151'
+  },
+  MIXED: { 
+    icon: '⚖️', 
+    color: '#FF7E5F', 
+    gradient: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
+    bgColor: 'rgba(255, 126, 95, 0.08)',
+    textColor: '#E91E63'
+  },
+};
+
 export const ReviewForm: React.FC = () => {
   const { activityId, targetId } = useParams<{ activityId: string; targetId: string }>();
   const navigate = useNavigate();
@@ -273,16 +305,30 @@ export const ReviewForm: React.FC = () => {
         </div>
 
         {/* Information Note */}
-        <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-          <div className="flex items-start">
-            <div className="text-blue-600 mr-3 mt-0.5">ℹ️</div>
-            <div className="text-sm text-blue-800">
-              <p className="font-medium mb-1">评价说明</p>
-              <ul className="space-y-1 text-blue-700">
-                <li>• 评价将在活动结束后 48 小时内有效</li>
-                <li>• 评价一旦提交无法修改，请慎重选择</li>
-                <li>• 恶意评价将被系统标记，影响信誉度</li>
-                <li>• 选择"跳过"不会影响双方信誉</li>
+        <div 
+          className="mt-6 p-4 rounded-xl border backdrop-blur-sm"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255, 126, 95, 0.05) 0%, rgba(255, 69, 114, 0.03) 100%)',
+            borderColor: 'rgba(255, 126, 95, 0.2)',
+          }}
+        >
+          <div className="flex items-start space-x-3">
+            <div 
+              className="mr-3 mt-0.5 text-lg"
+              style={{ color: '#FF7E5F' }}
+            >
+              ℹ️
+            </div>
+            <div 
+              className="text-sm font-medium"
+              style={{ color: '#E91E63' }}
+            >
+              <p className="font-semibold mb-2">评价指南</p>
+              <ul className="space-y-1" style={{ color: '#FF4572' }}>
+                <li>• 请基于实际攀岩体验给出客观评价</li>
+                <li>• 包含具体的攀岩技巧和难度描述</li>
+                <li>• 分享您的攀岩感受和建议</li>
+                <li>• 为其他攀岩者提供有价值的参考</li>
               </ul>
             </div>
           </div>

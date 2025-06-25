@@ -12,6 +12,36 @@ const NotificationContainer: React.FC = () => {
 
   if (!notifications.length) return null;
 
+  const getNotificationStyles = (type: string) => {
+    switch (type) {
+      case 'success':
+        return {
+          background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+          color: 'white',
+          boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+        };
+      case 'error':
+        return {
+          background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)',
+          color: 'white',
+          boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+        };
+      case 'warning':
+        return {
+          background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+          color: 'white',
+          boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+        };
+      case 'info':
+      default:
+        return {
+          background: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%)',
+          color: 'white',
+          boxShadow: '0 4px 12px rgba(255, 126, 95, 0.3)',
+        };
+    }
+  };
+
   return (
     <div 
       className="notification-container fixed top-4 right-4 space-y-2 max-w-sm"
@@ -20,15 +50,8 @@ const NotificationContainer: React.FC = () => {
       {notifications.map((notification, index) => (
         <div
           key={index}
-          className={`notification-toast p-4 rounded-lg shadow-lg transform transition-all duration-300 ease-in-out ${
-            notification.type === 'success' 
-              ? 'bg-green-500 text-white' 
-              : notification.type === 'error'
-              ? 'bg-red-500 text-white'
-              : notification.type === 'warning'
-              ? 'bg-yellow-500 text-white'
-              : 'bg-blue-500 text-white'
-          }`}
+          className="notification-toast p-4 rounded-lg transform transition-all duration-300 ease-in-out backdrop-blur-sm"
+          style={getNotificationStyles(notification.type)}
           role="alert"
           aria-live="polite"
         >
