@@ -88,46 +88,35 @@ const Button: React.FC<ButtonProps> = ({
     lg: 'px-6 py-3 text-base min-h-[44px] gap-2.5',
   };
 
-  // Enhanced variant styles with gradients and hover effects
+  // Enhanced variant styles with UX guide gradients
   const variantStyles = {
     primary: [
-      'bg-gradient-to-r from-primary-500 to-primary-600',
       'text-white',
       'shadow-soft',
-      'hover:from-primary-600 hover:to-primary-700',
-      'hover:shadow-medium',
       'focus:ring-primary-500',
-      'active:from-primary-700 active:to-primary-800',
+      'hover:shadow-primary-glow',
     ].join(' '),
     
     secondary: [
-      'bg-gradient-to-r from-secondary-500 to-secondary-600',
-      'text-white',
+      'text-white', 
       'shadow-soft',
-      'hover:from-secondary-600 hover:to-secondary-700',
-      'hover:shadow-medium',
       'focus:ring-secondary-500',
-      'active:from-secondary-700 active:to-secondary-800',
+      'hover:shadow-secondary-glow',
     ].join(' '),
     
     outline: [
       'bg-transparent',
       'text-primary-600',
-      'border-2 border-primary-500',
-      'hover:bg-primary-50',
+      'border-2',
       'hover:text-primary-700',
-      'hover:border-primary-600',
       'focus:ring-primary-500',
-      'active:bg-primary-100',
     ].join(' '),
     
     ghost: [
       'bg-transparent',
       'text-neutral-700',
-      'hover:bg-neutral-100',
       'hover:text-neutral-800',
       'focus:ring-neutral-500',
-      'active:bg-neutral-200',
     ].join(' '),
   };
 
@@ -179,11 +168,83 @@ const Button: React.FC<ButtonProps> = ({
     </>
   );
 
+  // Get inline styles for gradients based on variant
+  const getButtonStyles = () => {
+    const baseTransition = {
+      transitionProperty: 'all',
+      transitionTimingFunction: animations.easings.smooth,
+      transitionDuration: animations.normal,
+    };
+
+    switch (variant) {
+      case 'primary':
+        return {
+          ...baseTransition,
+          background: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 50%, #E91E63 100%)',
+        };
+      case 'secondary':
+        return {
+          ...baseTransition,
+          background: 'linear-gradient(135deg, #36D1DC 0%, #5B86E5 50%, #4F46E5 100%)',
+        };
+      case 'outline':
+        return {
+          ...baseTransition,
+          borderImage: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%) 1',
+          backgroundImage: 'linear-gradient(135deg, #FF7E5F 0%, #FF4572 100%), linear-gradient(white, white)',
+          backgroundOrigin: 'border-box',
+          backgroundClip: 'padding-box, border-box',
+        };
+      case 'ghost':
+        return {
+          ...baseTransition,
+        };
+      default:
+        return baseTransition;
+    }
+  };
+
+  const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled || loading) return;
+    
+    const button = e.currentTarget;
+    switch (variant) {
+      case 'primary':
+        button.style.background = 'linear-gradient(135deg, #FF8E7B 0%, #FF5A88 100%)';
+        button.style.transform = 'translateY(-1px)';
+        button.style.boxShadow = '0 8px 25px rgba(255, 126, 95, 0.3)';
+        break;
+      case 'secondary':
+        button.style.background = 'linear-gradient(135deg, #7DD3FC 0%, #93C5FD 100%)';
+        button.style.transform = 'translateY(-1px)';
+        button.style.boxShadow = '0 8px 25px rgba(54, 209, 220, 0.3)';
+        break;
+      case 'outline':
+        button.style.background = 'linear-gradient(135deg, #FFE8E5 0%, #FFF0F3 100%)';
+        break;
+      case 'ghost':
+        button.style.background = 'linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%)';
+        break;
+    }
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (disabled || loading) return;
+    
+    const button = e.currentTarget;
+    const originalStyles = getButtonStyles();
+    Object.assign(button.style, originalStyles);
+    button.style.transform = 'translateY(0)';
+    button.style.boxShadow = '';
+  };
+
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={`
         ${baseStyles}
         ${sizeStyles[size]}
@@ -191,11 +252,7 @@ const Button: React.FC<ButtonProps> = ({
         ${widthStyle}
         ${className}
       `}
-      style={{
-        transitionProperty: 'all',
-        transitionTimingFunction: animations.easings.smooth,
-        transitionDuration: animations.normal,
-      }}
+      style={getButtonStyles()}
     >
       {content}
     </button>
