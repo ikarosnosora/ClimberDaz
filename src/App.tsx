@@ -1,5 +1,7 @@
 import React, { Suspense, useEffect, useState, useMemo, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { initializePerformanceTests, performanceTestRunner } from './utils/performanceTest';
+import { performanceMonitor } from './utils/performance';
 import { useUserSelector } from './store/useOptimizedStore';
 import NotificationContainer from './components/NotificationContainer/NotificationContainer';
 import StatusBar from './components/StatusBar/StatusBar';
@@ -177,6 +179,35 @@ const App: React.FC = () => {
   useEffect(() => {
     registerServiceWorker();
   }, [registerServiceWorker]);
+
+  // Initialize performance monitoring and testing (Phase 4)
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      logDebugInfo('Initializing performance monitoring...');
+      
+      // Initialize performance tests
+      initializePerformanceTests();
+      
+      // Run performance tests after a delay to avoid blocking initial render
+      const performanceTimer = setTimeout(() => {
+        performanceTestRunner.runAllSuites().then(() => {
+          logDebugInfo('Performance tests completed');
+        }).catch((error) => {
+          console.error('Performance tests failed:', error);
+        });
+      }, 5000); // Run after 5 seconds
+      
+      // Log performance report every 30 seconds in development
+      const reportInterval = setInterval(() => {
+        performanceMonitor.logReport();
+      }, 30000);
+      
+      return () => {
+        clearTimeout(performanceTimer);
+        clearInterval(reportInterval);
+      };
+    }
+  }, [logDebugInfo]);
 
   // Memoized route elements to prevent recreation
   const routeElements = useMemo(() => ({

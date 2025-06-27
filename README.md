@@ -1,331 +1,289 @@
-# ClimberDaz - 攀岩找搭子小程序
+# 🧗‍♀️ ClimberDaz - 攀岩找搭子
 
-A modern rock climbing partner-finding app built with React, TypeScript, and Tailwind CSS. Designed for excellent performance, type safety, and scalability with plans for WeChat Mini Program migration.
+> A modern, elegant climbing partner-finding application built with React, TypeScript, and NestJS
 
-## 🎉 Recent Optimizations (December 2024)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com/)
 
-### ✅ **Type Safety Excellence**
-- **Zero TypeScript errors** - Eliminated all 118+ compilation issues
-- **Replaced all 'any' types** - Enhanced with specific TypeScript interfaces
-- **Strict ESLint configuration** - Comprehensive code quality enforcement
-- **Professional error handling** - Robust ErrorBoundary implementation
+## 🌟 Overview
 
-### ✅ **File Structure Optimization**
-- **Removed unused dependencies** - Eliminated 29+ packages (sass, vite-plugin-svgr)
-- **Cleaned up duplicate configs** - Modernized to ESLint flat config format
-- **Organized documentation** - Moved PRD to proper docs/ directory
-- **Enhanced .gitignore** - Comprehensive ignore patterns
+ClimberDaz is a comprehensive climbing partner-finding platform that connects climbing enthusiasts to discover activities, find climbing partners, and build a vibrant climbing community. The application supports various climbing types including bouldering, top rope, lead climbing, and outdoor adventures.
 
-### ✅ **Performance Monitoring**
-- **Built-in performance utilities** - Automatic component monitoring
-- **Memory usage tracking** - Development-time optimization tools
-- **Debounce/throttle helpers** - Performance optimization utilities
-- **Lazy loading support** - Component code-splitting utilities
+### ✨ Key Features
 
-## 🚀 Features Implemented
+- 🎯 **Activity Management**: Create, join, and manage climbing activities
+- 👥 **Partner Matching**: Find climbing partners based on skill level and preferences
+- 🏔️ **Multi-Discipline Support**: Bouldering, Top Rope, Lead Climbing, Outdoor climbing
+- 📍 **Location-Based**: Discover activities near you with interactive maps
+- 💬 **Real-time Communication**: Chat and comment system for activity coordination
+- ⭐ **Review System**: Rate and review climbing partners
+- 📱 **Mobile-First Design**: Optimized for mobile devices with PWA support
+- 🔔 **Smart Notifications**: Real-time updates and activity reminders
+- 🎨 **Modern UI/UX**: Beautiful gradient-based design with climbing themes
 
-### 🔐 **Core Features**
-- **User Authentication**: Mock login system (ready for WeChat OAuth integration)
-- **Activity Management**: Create, browse, and join climbing activities with real-time updates
-- **Smart Sign-up System**: Join/cancel activities with participant tracking and validation
-- **Interactive Comment System**: Activity discussion boards with real-time updates
-- **Comprehensive Review System**: Post-activity evaluation with 4-dimension ratings
-- **Rich User Profiles**: Personal stats, gear tags, activity history, and achievement tracking
-- **Privacy Controls**: Support for private activities with secure access control
-- **Admin Dashboard**: Content moderation and user management tools
+## 🏗️ Architecture
 
-### 📱 **Modern UI Components**
-- **Activity Cards**: Status indicators, participant tracking, and responsive design
-- **User Avatars**: Level badges, gear indicators, and interactive profiles
-- **Rating System**: Star ratings with detailed feedback forms
-- **Notification System**: Toast notifications with success/error states
-- **Mobile Navigation**: Optimized tab navigation with smooth transitions
-- **Form Components**: DateTime pickers, multi-select, and validation
-- **Loading States**: Skeleton loading and async state management
+### Frontend Stack
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS with custom gradient system
+- **State Management**: Zustand
+- **Routing**: React Router DOM
+- **Maps**: React Leaflet
+- **Charts**: Recharts
+- **Icons**: Heroicons, React Icons
+- **Real-time**: Socket.IO Client
 
-### 🎨 **Enhanced UX Features**
-- **Toast Notifications**: Professional notification system
-- **Empty States**: Helpful guidance when no data is available
-- **Error Boundaries**: Graceful error handling with fallback UI
-- **Responsive Design**: Mobile-first with tablet and desktop support
-- **Performance Optimized**: Fast loading and smooth interactions
+### Backend Stack
+- **Framework**: NestJS with TypeScript
+- **Database**: SQLite (development) / MySQL (production)
+- **ORM**: TypeORM
+- **Authentication**: JWT with Passport
+- **Real-time**: Socket.IO
+- **Caching**: Redis
+- **Documentation**: Swagger/OpenAPI
+- **Security**: Helmet, CORS, Rate Limiting
 
-## 🛠️ Tech Stack
+### Key Technologies
+- **Performance**: Virtual scrolling, lazy loading, code splitting
+- **Offline Support**: Service Worker, IndexedDB caching
+- **Analytics**: Performance monitoring and user analytics
+- **Security**: JWT authentication, input validation, CSRF protection
 
-### **Frontend Core**
-- **React 18** - Modern React with hooks and concurrent features
-- **TypeScript 5.3** - Strict type checking for enhanced developer experience
-- **Tailwind CSS 3.4** - Utility-first styling with responsive design
-- **Vite 6.3** - Ultra-fast build tool and development server
+## 🚀 Quick Start
 
-### **State & Routing**
-- **Zustand 4.5** - Lightweight state management with TypeScript support
-- **React Router v6** - Modern routing with data loading patterns
+### Prerequisites
 
-### **Development Tools**
-- **ESLint 8** - Modern flat config with comprehensive rules
-- **Prettier 3** - Consistent code formatting
-- **TypeScript ESLint** - Advanced TypeScript-specific linting
+- Node.js 18+ and npm
+- MySQL (for production) or SQLite (for development)
+- Redis (optional, for caching)
 
-### **Utilities**
-- **Day.js 1.11** - Lightweight date manipulation
-- **Axios 1.9** - HTTP client with interceptors and error handling
-- **React Icons 5.5** - Comprehensive icon library
-- **Leaflet 1.9** - Interactive maps for location selection
+### Installation
 
-## 📁 Optimized Project Structure
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd ClimberDaz-1
+   ```
 
-```
-climberdaz-app/
-├── docs/                          # Project documentation
-│   └── ClimberDaz PRD v1.0.md    # Product requirements document
-├── src/
-│   ├── components/                # Reusable UI components
-│   │   ├── ActivityCard/          # Activity display component
-│   │   ├── AnnouncementBanner/    # Auto-rotating announcements
-│   │   ├── Button/                # Custom button component
-│   │   ├── CommentList/           # Comment display components
-│   │   ├── EmptyState/            # Empty state component
-│   │   ├── ErrorBoundary/         # Error handling boundary
-│   │   ├── FormComponents/        # Form input components
-│   │   ├── Layout/                # Page layout components
-│   │   ├── NavBar/                # Navigation bar
-│   │   ├── NotificationContainer/ # Notification system
-│   │   ├── Profile/               # Profile-related components
-│   │   ├── Rating/                # Star rating component
-│   │   ├── TextArea/              # Custom textarea
-│   │   ├── Toast/                 # Toast notification system
-│   │   └── UserAvatar/            # User avatar with badges
-│   ├── pages/                     # Page components
-│   │   ├── ActivityDetail/        # Activity detail view
-│   │   ├── ActivityList/          # Activity browsing
-│   │   ├── AdminDashboardPage/    # Admin management interface
-│   │   ├── CommentBoard/          # Activity discussion
-│   │   ├── CreateActivity/        # Activity creation form
-│   │   ├── Login/                 # Authentication
-│   │   ├── MyActivities/          # User's activities
-│   │   ├── NotificationsPage/     # Notification center
-│   │   ├── Profile/               # User profile management
-│   │   └── ReviewForm/            # Post-activity reviews
-│   ├── store/                     # State management
-│   │   ├── useOptimizedStore.ts   # Optimized store with performance monitoring
-│   │   └── useStore.ts            # Main application store
-│   ├── types/                     # TypeScript definitions
-│   │   ├── common.ts              # Common interfaces and types
-│   │   └── index.ts               # Type exports
-│   ├── services/                  # API and external services
-│   ├── hooks/                     # Custom React hooks
-│   ├── utils/                     # Utility functions
-│   │   ├── api.ts                 # API utilities with error handling
-│   │   ├── constants.ts           # Application constants
-│   │   ├── geo.ts                 # Geolocation utilities
-│   │   ├── notifications.ts       # Notification management
-│   │   └── performance.tsx        # Performance monitoring tools
-│   ├── data/                      # Mock data and test fixtures
-│   └── constants/                 # Static data and configurations
-```
+2. **Install dependencies**
+   ```bash
+   # Install frontend dependencies
+   npm install
+   
+   # Install backend dependencies
+   cd backend
+   npm install
+   cd ..
+   ```
 
-## 🚀 Getting Started
+3. **Environment Setup**
+   
+   Create environment files based on `ENVIRONMENT_SETUP.md`:
+   
+   **Frontend (.env.development)**
+   ```bash
+   VITE_API_BASE_URL=http://localhost:3001/api
+   VITE_WS_URL=ws://localhost:3001
+   VITE_APP_NAME=ClimberDaz
+   VITE_DEBUG=true
+   ```
+   
+   **Backend (backend/.env.development)**
+   ```bash
+   NODE_ENV=development
+   PORT=3001
+   DB_HOST=localhost
+   DB_DATABASE=climberdaz_dev
+   JWT_SECRET=your-jwt-secret-key
+   ```
 
-### **Prerequisites**
-- **Node.js** >= 18.0.0
-- **npm** >= 9.0.0 or **yarn** >= 1.22.0
+4. **Database Setup**
+   ```bash
+   cd backend
+   npm run migration:run
+   npm run seed
+   cd ..
+   ```
 
-### **Quick Start**
-```bash
-# Clone the repository
-git clone <repository-url>
-cd ClimberDaz
+5. **Start Development Servers**
+   ```bash
+   # Terminal 1: Start backend
+   cd backend
+   npm run start:dev
+   
+   # Terminal 2: Start frontend
+   npm run dev
+   ```
 
-# Install dependencies
-npm install
+6. **Access the Application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:3001/api
+   - API Documentation: http://localhost:3001/api/docs
 
-# Start development server
-npm run dev
+## 📱 Features Deep Dive
 
-# Open in browser
-# The app will be available at http://localhost:3000
-```
+### Activity Types
+- **🪨 Bouldering**: V-Scale grading (V0-V2 to V8+)
+- **🧗‍♀️ Top Rope**: Auto-belay and manual belay options
+- **⛰️ Lead Climbing**: Advanced climbing with YDS grading
+- **🏔️ Outdoor**: Natural rock climbing adventures
+- **💪 Training**: Skill development and fitness sessions
 
-### **Development Commands**
-```bash
-# Development
-npm run dev              # Start dev server with hot reload
-npm run build           # Build for production
-npm run preview         # Preview production build locally
+### Grading Systems
+- **V-Scale**: V0-V2, V3-V5, V6-V7, V8+
+- **YDS (Yosemite Decimal System)**: 5.5-5.8 to 5.13+
+- **Flexible Grading**: Open grades for mixed skill groups
 
-# Code Quality
-npm run lint            # Run ESLint checks
-npm run format          # Format code with Prettier
-
-# Type Checking
-npx tsc --noEmit        # TypeScript type checking
-```
-
-## 📊 Build & Performance Status
-
-### **Current Status** ✅
-- **Build Status**: ✅ **100% Success** (0 errors)
-- **Type Safety**: ✅ **Excellent** (strict TypeScript)
-- **Code Quality**: ✅ **High** (ESLint passing with 0 errors, 1 warning)
-- **Performance**: ✅ **Optimized** (214.27 kB main bundle, 71.60 kB gzipped)
-- **File Structure**: ✅ **Clean** (no unused files or dependencies)
-
-### **Bundle Analysis**
-```
-Main Bundle: 214.27 kB (gzipped: 71.60 kB)
-CSS Bundle:  40.03 kB (gzipped: 7.15 kB)
-Build Time:  ~1.10s
-```
-
-## 📱 Usage Guide
-
-### **Getting Started**
-1. **Login**: Enter any nickname to access the app
-2. **Browse Activities**: Explore available climbing sessions
-3. **Create Activity**: Use the "发布" tab to organize new activities
-4. **Join Activities**: Sign up from activity detail pages
-5. **Interact**: Comment and engage with the community
-6. **Review**: Rate participants after completing activities
-
-### **Key Features**
-- **Real-time Updates**: Activity status and participant changes
-- **Smart Notifications**: Success/error feedback with toast messages
+### User Experience
 - **Responsive Design**: Optimized for mobile, tablet, and desktop
-- **Offline Ready**: Basic offline functionality with local storage
+- **Performance Optimized**: Virtual scrolling, lazy loading, code splitting
+- **Accessibility**: WCAG compliant with screen reader support
+- **Offline Capability**: Service worker for offline functionality
+- **Real-time Updates**: Live activity updates and notifications
 
-## 🔄 WeChat Mini Program Migration Ready
+## 🛠️ Development
 
-The app is architected for seamless WeChat Mini Program migration:
+### Available Scripts
 
-### **Migration Advantages**
-- **Clean Architecture**: Modular components ready for Taro conversion
-- **TypeScript**: Full type safety transfers to Mini Program
-- **State Management**: Zustand patterns work with Taro
-- **Component Structure**: Easy mapping to Mini Program components
-
-### **Migration Roadmap**
+**Frontend**
 ```bash
-# Phase 1: Framework Migration
-- [ ] Integrate Taro framework
-- [ ] Convert React components to Taro components
-- [ ] Migrate routing to Taro navigation
-
-# Phase 2: WeChat Integration
-- [ ] Implement WeChat OAuth login
-- [ ] Add WeChat payment for activities
-- [ ] Integrate WeChat location services
-- [ ] Implement subscription messages
-
-# Phase 3: Mini Program Features
-- [ ] Add WeChat sharing capabilities
-- [ ] Implement Mini Program analytics
-- [ ] Add WeChat customer service
-- [ ] Optimize for Mini Program performance
+npm run dev              # Start development server
+npm run build            # Build for production
+npm run preview          # Preview production build
+npm run lint             # Run ESLint
+npm run format           # Format code with Prettier
+npm run test:performance # Run performance tests
 ```
 
-### **Component Migration Map**
-| Current | Target | Status |
-|---------|--------|--------|
-| React Components | Taro Components | Ready |
-| Tailwind CSS | WeChat WXSS | Planned |
-| React Router | Taro Navigation | Ready |
-| Zustand Store | Taro Store | Ready |
-| Axios API | WeChat API | Planned |
-
-## 🧪 Testing & Quality
-
-### **Code Quality Tools**
-- **ESLint**: Comprehensive linting with React, TypeScript, and accessibility rules
-- **TypeScript**: Strict type checking with zero errors
-- **Prettier**: Consistent code formatting
-- **Performance Monitoring**: Built-in performance tracking utilities
-
-### **Testing Commands**
+**Backend**
 ```bash
-# Code Quality Checks
-npm run lint            # ESLint analysis
-npm run format          # Code formatting
-npx tsc --noEmit       # Type checking
-
-# Performance Analysis
-npm run build --analyze # Bundle analysis
+npm run start:dev        # Start development server
+npm run build            # Build for production
+npm run start:prod       # Start production server
+npm run test             # Run tests
+npm run migration:generate # Generate database migration
+npm run migration:run    # Run database migrations
 ```
 
-## 🛣️ Roadmap
+### Project Structure
 
-### **Immediate Priorities**
-- [ ] **Testing Infrastructure**: Unit and integration tests with Jest/Vitest
-- [ ] **Backend Integration**: Real API endpoints and authentication
-- [ ] **Enhanced Maps**: Interactive location selection with Leaflet
-- [ ] **Image Upload**: Activity photos and user avatars
+```
+ClimberDaz-1/
+├── src/                     # Frontend source code
+│   ├── components/          # Reusable UI components
+│   ├── pages/              # Page components
+│   ├── hooks/              # Custom React hooks
+│   ├── store/              # State management
+│   ├── services/           # API services
+│   ├── utils/              # Utility functions
+│   └── types/              # TypeScript type definitions
+├── backend/                # Backend source code
+│   ├── src/
+│   │   ├── modules/        # Feature modules
+│   │   ├── common/         # Shared utilities
+│   │   ├── config/         # Configuration
+│   │   └── database/       # Database setup
+│   └── test/               # Backend tests
+├── docs/                   # Documentation
+└── public/                 # Static assets
+```
 
-### **Next Phase**
-- [ ] **WeChat Mini Program**: Complete migration to WeChat ecosystem
-- [ ] **Real-time Features**: WebSocket integration for live updates
-- [ ] **Advanced Analytics**: User behavior tracking and insights
-- [ ] **Content Moderation**: Automated content filtering
+### Key Components
 
-### **Future Enhancements**
-- [ ] **Internationalization**: Multi-language support
-- [ ] **Progressive Web App**: Enhanced mobile experience
-- [ ] **AI Features**: Smart activity matching and recommendations
-- [ ] **Social Features**: Friends system and group activities
+- **VirtualizedList**: High-performance list rendering
+- **ActivityCard**: Activity display with swipe actions
+- **NotificationCenter**: Real-time notification system
+- **ConnectionManager**: Network status management
+- **LazyImage**: Optimized image loading
+- **PullToRefresh**: Mobile-friendly refresh mechanism
+
+## 🎨 Design System
+
+The application features a sophisticated gradient-based design system inspired by climbing and outdoor themes:
+
+- **Primary Gradients**: Sunrise climb colors (orange to pink)
+- **Secondary Gradients**: Mountain sky colors (blue to purple)
+- **Activity-Specific**: Unique gradients for each climbing type
+- **Accessibility**: High contrast ratios and screen reader support
+
+## 🔧 Configuration
+
+### Environment Variables
+
+See `ENVIRONMENT_SETUP.md` for detailed environment configuration including:
+- Database connections
+- JWT secrets
+- WeChat integration
+- External service APIs
+- Performance monitoring
+
+### Performance Optimization
+
+- **Code Splitting**: Lazy-loaded routes and components
+- **Virtual Scrolling**: Efficient rendering of large lists
+- **Image Optimization**: Lazy loading and responsive images
+- **Caching**: Redis for backend, IndexedDB for frontend
+- **Bundle Analysis**: Built-in bundle size monitoring
+
+## 🚀 Deployment
+
+### Production Build
+
+```bash
+# Build frontend
+npm run build
+
+# Build backend
+cd backend
+npm run build
+```
+
+### Docker Support
+
+The application can be containerized using Docker for easy deployment.
+
+### Environment Setup
+
+1. Configure production environment variables
+2. Set up MySQL database
+3. Configure Redis for caching
+4. Set up SSL certificates
+5. Configure reverse proxy (nginx)
 
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these guidelines:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-### **Development Workflow**
-1. **Fork** the repository
-2. **Clone** your fork locally
-3. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-4. **Commit** your changes (`git commit -m 'feat: add amazing feature'`)
-5. **Push** to your branch (`git push origin feature/amazing-feature`)
-6. **Open** a Pull Request
+### Development Guidelines
 
-### **Code Standards**
-- Follow existing TypeScript and React patterns
-- Maintain test coverage for new features
-- Use conventional commit messages
-- Ensure ESLint and TypeScript checks pass
-
-### **Development Setup**
-```bash
-# Install dependencies
-npm install
-
-# Start development
-npm run dev
-
-# Run quality checks
-npm run lint
-npm run format
-```
+- Follow TypeScript best practices
+- Write comprehensive tests
+- Follow the existing code style
+- Update documentation as needed
+- Ensure accessibility compliance
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👥 Contact & Support
+## 🙏 Acknowledgments
 
-- **Project Issues**: [GitHub Issues](https://github.com/yourusername/ClimberDaz/issues)
-- **Documentation**: See `docs/` directory for detailed specifications
-- **Development Team**: Contact maintainers for technical questions
+- React and NestJS communities
+- Climbing community for inspiration
+- Contributors and testers
+- Open source libraries and tools
 
----
+## 📞 Support
 
-## 🏆 Project Highlights
-
-- **🎯 Type Safety**: Zero TypeScript errors with strict configuration
-- **⚡ Performance**: Optimized build with monitoring tools
-- **🧹 Clean Code**: ESLint passing with comprehensive rules
-- **📱 Mobile First**: Responsive design optimized for all devices
-- **🔧 Developer Experience**: Hot reload, formatting, and linting
-- **🚀 Production Ready**: Optimized builds and error handling
-
-**Status**: ✅ **Production Ready** - Fully optimized and type-safe with excellent developer experience.
+For support, please open an issue on GitHub or contact the development team.
 
 ---
 
-*Last Updated: December 2024 - Version 1.0 Optimized*
+**Happy Climbing! 🧗‍♀️🏔️**

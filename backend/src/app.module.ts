@@ -11,6 +11,8 @@ import { ActivityModule } from './modules/activity/activity.module';
 import { ClimbingGymModule } from './modules/climbing-gym/climbing-gym.module';
 import { ReviewModule } from './modules/review/review.module';
 import { NotificationModule } from './modules/notification/notification.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 // Import demo controller
 import { DemoController } from './demo.controller';
@@ -57,8 +59,10 @@ import { DemoController } from './demo.controller';
     ActivityModule,
     ReviewModule,
     NotificationModule,
+    AnalyticsModule,
+    AdminModule,
   ],
   controllers: [DemoController],
   providers: [],
 })
-export class AppModule {} 
+export class AppModule {}

@@ -17,6 +17,8 @@ const activity_module_1 = require("./modules/activity/activity.module");
 const climbing_gym_module_1 = require("./modules/climbing-gym/climbing-gym.module");
 const review_module_1 = require("./modules/review/review.module");
 const notification_module_1 = require("./modules/notification/notification.module");
+const analytics_module_1 = require("./modules/analytics/analytics.module");
+const admin_module_1 = require("./modules/admin/admin.module");
 const demo_controller_1 = require("./demo.controller");
 let AppModule = class AppModule {
 };
@@ -46,6 +48,8 @@ exports.AppModule = AppModule = __decorate([
             activity_module_1.ActivityModule,
             review_module_1.ReviewModule,
             notification_module_1.NotificationModule,
+            analytics_module_1.AnalyticsModule,
+            admin_module_1.AdminModule,
         ],
         controllers: [demo_controller_1.DemoController],
         providers: [],
