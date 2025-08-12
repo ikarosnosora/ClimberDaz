@@ -245,8 +245,10 @@ class AnalyticsManager {
       this.flush();
     }
 
-    // 保存到本地存储作为备份
-    this.saveToLocalStorage();
+    // 仅在离线时保存到本地存储，避免不必要的写入
+    if (!this.isOnline) {
+      this.saveToLocalStorage();
+    }
   }
 
   /**

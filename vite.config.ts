@@ -135,7 +135,7 @@ export default defineConfig({
         },
         
         // Optimize chunk naming for better caching
-        chunkFileNames: (chunkInfo) => {
+        chunkFileNames: (_chunkInfo) => {
           // Use shorter hashes for better caching
           return `assets/js/[name]-[hash:8].js`;
         },
